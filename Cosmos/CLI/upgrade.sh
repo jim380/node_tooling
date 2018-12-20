@@ -77,7 +77,7 @@ then
 echo "-----------------------------------------"
 echo "                 Checkout                "
 echo "-----------------------------------------"
-read -p "What version would you like to checkout?
+test -z ${CHECKOUT_VERSION} && read -p "What version would you like to checkout?
 Enter 'master' or specify a version number (e.g. 'v0.28.0')
 " CHECKOUT_VERSION
 echo "Installing $CHECKOUT_VERSION"
@@ -89,7 +89,7 @@ make update_tools && make get_vendor_deps && make install
 echo "-----------------------------------------"
 echo "            Fetch genesis.json           "
 echo "-----------------------------------------"
-read -p "Link to genesis.json in raw format
+test -z ${GENESIS} && read -p "Link to genesis.json in raw format
 " GENESIS
 echo ""
 if ! test -d $HOME/.gaiad/config
