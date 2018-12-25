@@ -4,7 +4,7 @@ pause(){
 }
 while true
         do
-                CHAINID=game_of_stakes_1
+                CHAINID=genki-4000
                 read -s -p "Passphrase: " passphrase
                 # echo $passphrase|gaiacli tx dist withdraw-rewards --chain-id "genki-2000" --from "main" --is-validator
                 read -p "
@@ -14,32 +14,45 @@ Fee: " FEE
                 ASSET="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.coins" | jq ".[0].denom"| bc`"
                 if [  $ASSET == "photinos" ]
                 then
+                        echo "----------------------------------"
                         echo "No STAKE yet"  
+                        echo "----------------------------------"
+                        echo ""
                         pause   
                 else
                 STEAK=`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.coins" | jq ".[0].amount" | bc`
-                # echo "$STEAK"
                 NETSTAKE=$(($STEAK - $FEE))
                 # echo "Net stake: $NETSTAKE"
                 while [[ $STEAK -ne 0 ]] && [[ $NETSTAKE -gt 0 ]]
                         do
                                 echo "----------------------------------"
-                                echo " Blance: ""$((STEAK ))"" "
+                                echo " Blance Pre-withdrawl: ""$((STEAK))"" "
                                 echo "----------------------------------"
+                                echo ""
+                                echo "✓✓✓"
+                                echo ""
                                 echo "----------------------------------"
                                 echo " Withdraw "
                                 echo "----------------------------------"
-                                echo $passphrase|gaiacli tx dist withdraw-rewards --chain-id=$CHAINID --from="CypherCore" --is-validator
-                                sleep 10s
+                                echo $passphrase|gaiacli tx dist withdraw-rewards --chain-id=$CHAINID --from="CypherCore" --is-validator --fee="$FEE""STAKE"
+                                sleep 5s
+                                STEAK=`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.coins" | jq ".[0].amount" | bc`
+                                NETSTAKE=$(($STEAK - $FEE))
+                                echo "----------------------------------"
+                                echo " Blance Post-withdrawl: ""$((STEAK))"" "
+                                echo "----------------------------------"
+                                echo ""
+                                echo "✓✓✓"
+                                echo ""
                                 echo "----------------------------------"
                                 echo " Delegate "
                                 echo "----------------------------------"
-                                echo $passphrase|gaiacli tx stake delegate --from="CypherCore" --validator "cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs" --chain-id "game_of_stakes" --amount "$NETSTAKE""STAKE" --sequence 0
+                                echo $passphrase|gaiacli tx stake delegate --from="CypherCore" --validator="cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs" --chain-id=$CHAINID --amount="$NETSTAKE""STAKE" --fee="$FEE""STAKE" --sequence=0
                                 sleep 10s
+                                VOTINGPOWER=`gaiacli status | jq ".validator_info.voting_power" | bc`
                                 echo "----------------------------------"
-                                echo " Balance "
+                                echo " Voting Power: $VOTINGPOWER "
                                 echo "----------------------------------"
-                                gaiacli status | jq ".[].voting_power"
                                 sleep 600s
                 done
                 echo "----------------------------------"

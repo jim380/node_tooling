@@ -1,0 +1,34 @@
+{
+"node_info":
+    {"protocol_version":{"p2p":"5","block":"8","app":"0"},
+        "id":"498fe968ce3570bc436f36869f205aa4e513fb91",
+        "listen_addr":"tcp://0.0.0.0:26656","network":"genki-4000",
+        "version":"0.27.3",
+        "channels":"40202122233038",
+        "moniker":"Cypher Core",
+        "other":{"tx_index":"on","rpc_address":"tcp://0.0.0.0:26657"}
+    },
+"sync_info":
+    {"latest_block_hash":"CE83A1B302D503347135CE07DAC819D27C3F41BD460CE0EE3E9E93455D141C38",
+    "latest_app_hash":"389415580EDDA4E9AA549030EBD0429D4913B1A6DD3FD0C13FCCF49A07D700C6",
+    "latest_block_height":"73921","latest_block_time":"2018-12-25T21:03:08.913219318Z",
+    "catching_up":false
+    },
+"validator_info":
+    {"address":"B0155252D73B7EEB74D2A8CC814397E66970A839",
+    "pub_key":{"type":"tendermint/PubKeyEd25519","value":"w3rKE+tQoLK8G+XPmjn+NszCk07iQ0sWaBbN5hQZcBY="},
+    "voting_power":"11291"
+    }
+}
+
+{  
+    "type":"auth/Account",
+    "value":{
+        "address":"cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr",
+        "coins":[
+                    {"denom":"STAKE","amount":"127"},
+                    {"denom":"photinos","amount":"10000000284"}
+                ],
+        "public_key":{"type":"tendermint/PubKeySecp256k1","value":"AlX825sr2FmvR8R/sizJMm2zuY74AxBrL+tbgrGPG+JN"},
+        "account_number":"222","sequence":"6"}
+}
