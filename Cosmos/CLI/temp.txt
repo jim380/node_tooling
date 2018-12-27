@@ -30,5 +30,6 @@
                     {"denom":"photinos","amount":"10000000284"}
                 ],
         "public_key":{"type":"tendermint/PubKeySecp256k1","value":"AlX825sr2FmvR8R/sizJMm2zuY74AxBrL+tbgrGPG+JN"},
-        "account_number":"222","sequence":"6"}
+        "account_number":"222",
+        "sequence":"6"}
 }
