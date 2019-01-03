@@ -77,13 +77,8 @@ echo "-----------------------------------------"
 echo "             Set Env Variables           "
 echo "-----------------------------------------"
 sudo sh -c "echo 'export PATH=\$PATH:/usr/local/go/bin' >> /etc/profile"
-cat /etc/profile
 echo "export GOPATH=$GO_PATH" >> ~/.profile
 echo "export PATH=$GO_PATH/bin:\$PATH" >> ~/.profile
-cat ~/.profile
-#echo "export GOPATH=$GO_PATH" >> ~/.bash_profile
-#echo "export GOBIN=$GO_PATH/bin" >> ~/.bash_profile
-#echo "export PATH=$PATH:$GOBIN" >> ~/.bash_profile
 echo "Success"
 echo "-----------------------------------------"
 echo "                  Reboot                 "
