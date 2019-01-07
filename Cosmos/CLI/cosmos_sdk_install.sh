@@ -26,20 +26,57 @@
 #  
 #  ============================================================================
 echo "-----------------------------------------"
+echo "               System Update             "
+echo "-----------------------------------------"
+sudo apt-get update && sudo apt-get upgrade -y 
+echo "-----------------------------------------"
+echo "                Preparation              "
+echo "-----------------------------------------"
+sudo apt-get install make gcc g++ -y
+sudo sudo apt autoremove
+echo "-----------------------------------------"
 echo "             Install Binaries            "
 echo "-----------------------------------------"
 if ! test -d $GOPATH/src/github.com/cosmos
 then
     mkdir -p $GOPATH/src/github.com/cosmos
+    cd $GOPATH/src/github.com/cosmos
+    git clone https://github.com/cosmos/cosmos-sdk
 fi
-cd $GOPATH/src/github.com/cosmos
-git clone https://github.com/cosmos/cosmos-sdk
-cd cosmos-sdk
+echo "-----------------------------------------"
+echo "             Update Binary               "
+echo "-----------------------------------------"
+REPO=$GOPATH/src/github.com/cosmos/cosmos-sdk
+if [ -d "$REPO" ]
+then
+    cd $REPO
+    if [ -d "$REPO/.git" ]
+    then
+      echo "Updating $REPO at
+`date`"
+      git status
+      echo "-----------------------------------------"
+      echo "               Fetching                  "
+      echo "-----------------------------------------"
+      git fetch
+      echo "-----------------------------------------"
+      echo "                Pulling                  "
+      echo "-----------------------------------------"
+      git pull
+    else
+      echo "-----------------------------------------"
+      echo "This is not a git folder."
+      echo "-----------------------------------------"
+    fi
+    echo "Finished updating at
+`date`"
+    echo ""
+fi
 echo "-----------------------------------------"
 echo "                 Checkout                "
 echo "-----------------------------------------"
 read -p "What version would you like to checkout?
-Enter 'master' or specify a version number (e.g. 'v0.28.0')
+Enter 'master' or specify a version number (e.g. 'v0.29.0')
 " CHECKOUT_VERSION
 echo "Installing $CHECKOUT_VERSION"
 git checkout $CHECKOUT_VERSION
