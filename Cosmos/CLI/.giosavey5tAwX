@@ -1,0 +1,3 @@
+#!/bin/bash
+WITHDRAWGAS= "`gaiacli tx dist withdraw-rewards --chain-id=game_of_stakes_3 --from="CypherCore" --is-validator --dry-run`"
+echo $WITHDRAWGAS
