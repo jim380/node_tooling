@@ -37,16 +37,16 @@ sudo sudo apt autoremove
 echo "-----------------------------------------"
 echo "             Install Binaries            "
 echo "-----------------------------------------"
-if ! test -d $GOPATH/src/github.com/cosmos
+if ! test -d $GOPATH/src/github.com/irisnet
 then
-    mkdir -p $GOPATH/src/github.com/cosmos
-    cd $GOPATH/src/github.com/cosmos
-    git clone https://github.com/cosmos/cosmos-sdk
+    mkdir -p $GOPATH/src/github.com/irisnet
+    cd $GOPATH/src/github.com/irisnet
+    git clone https://github.com/irisnet/irishub
 fi
 echo "-----------------------------------------"
 echo "             Update Binary               "
 echo "-----------------------------------------"
-REPO=$GOPATH/src/github.com/cosmos/cosmos-sdk
+REPO=$GOPATH/src/github.com/irisnet/irishub
 if [ -d "$REPO" ]
 then
     cd $REPO
@@ -90,32 +90,42 @@ echo "-----------------------------------------"
 read -p "What would you like the node to be called?
 " NODE_NAME
 echo "Node name has been set to '$NODE_NAME'"
-read -p "What would you like the Gaiad home directory to be? (default: ~/.gaiad)
-" GAIAD_HOME
-if [ -z "$GAIAD_HOME" ]
+read -p "What would you like the Iris home directory to be? (default: ~/.iris)
+" IRIS_HOME
+if [ -z "$IRIS_HOME" ]
 then 
-    echo "Gaiad home directory has been set to ~/.iris"
-    gaiad init --name=$NODE_NAME --home=~/.gaiad
+    echo "Iris home directory has been set to ~/.iris"
+    iris init --name=$NODE_NAME --home=~/.iris
 else
-    echo "Gaiad home directory has been set to '$GAIAD_HOME'"
-    iris init --name=$NODE_NAME --home=$GAIAD_HOME
+    echo "Iris home directory has been set to '$IRIS_HOME'"
+    iris init --name=$NODE_NAME --home=$IRIS_HOME
+fi
+echo "-----------------------------------------"
+echo "            rm genesis&config            "
+echo "-----------------------------------------"
+if [ -d $IRIS_HOME/config/genesis.json ] && [ -d $IRIS_HOME/config/config.toml ]
+then
+    rm $IRIS_HOME/config/genesis.json $IRIS_HOME/config/config.toml
 fi
 echo "-----------------------------------------"
 echo "            Fetch genesis.json           "
 echo "-----------------------------------------"
-if test -d $GAIAD_HOME/config/genesis.json
-then
-    rm $GAIAD_HOME/config/genesis.json
-fi
 read -p "Link to genesis.json in raw format:
 " GENESIS
 echo ""
-curl $GENESIS > $GAIAD_HOME/config/genesis.json
+curl $GENESIS > $IRIS_HOME/config/genesis.json
+echo "-----------------------------------------"
+echo "            Fetch config.toml            "
+echo "-----------------------------------------"
+read -p "Link to config.toml in raw format:
+" CONFIG
+echo ""
+curl $CONFIG > $IRIS_HOME/config/config.toml
 echo "-----------------------------------------"
 echo "               gaiad version             "
 echo "-----------------------------------------"
-gaiad version
+iris version
 echo "-----------------------------------------"
 echo "              gaiacli version"
 echo "-----------------------------------------"
-gaiacli version
+iriscli version
