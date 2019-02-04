@@ -83,7 +83,7 @@ git checkout $CHECKOUT_VERSION
 echo "-----------------------------------------"
 echo "              Make & Install             "
 echo "-----------------------------------------"
-make get_tools && make get_vendor_deps && make install
+make get_vendor_deps && make install
 echo "-----------------------------------------"
 echo "                Node Init                "
 echo "-----------------------------------------"
@@ -94,7 +94,7 @@ read -p "What would you like the Gaiad home directory to be? (default: ~/.gaiad)
 " GAIAD_HOME
 if [ -z "$GAIAD_HOME" ]
 then 
-    echo "Gaiad home directory has been set to ~/.iris"
+    echo "Gaiad home directory has been set to ~/.gaiad"
     gaiad init --name=$NODE_NAME --home=~/.gaiad
 else
     echo "Gaiad home directory has been set to '$GAIAD_HOME'"
