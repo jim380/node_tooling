@@ -4,7 +4,7 @@ pause(){
 }
 while true
         do
-                CHAINID=game_of_stakes_5
+                CHAINID=game_of_stakes_6
                 echo "----------------------------------"
                 echo "|           User Input           |"  
                 echo "----------------------------------"
@@ -16,7 +16,7 @@ Fee: " FEE
                 echo "➤ Fee has been set to $FEE photinos."
                 # STEAK=`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.coins" | jq ".[0].amount" | bc`
                 ASSET="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node --output=json | jq ".value.BaseVestingAccount.BaseAccount.coins" | jq ".[1].amount"| bc`"
-                if [  $ASSET == "0" ]
+               	if [  $ASSET == "0" ]
                 then
                         echo ""
                         echo "➤ No STAKE available in balance to be delegated yet."
@@ -37,7 +37,7 @@ Fee: " FEE
                                 echo "----------------------------------"
                                 #echo "➤ Prev Seq: $SEQ "
                                 #echo "➤ Next Seq: $SEQUENCE "
-                                echo $passphrase|gaiacli tx distr withdraw-rewards --chain-id=$CHAINID --from="CypherCore" --is-validator #--fee="$FEE""photinos"
+                                echo $passphrase|gaiacli tx distr withdraw-rewards --chain-id=$CHAINID cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs --from="CypherCore" --commission --async #--fee="$FEE""photinos"
                                 sleep 30s
                                 echo ""
                                 echo "➤ Stake available post-withdrawl: $STEAK "
@@ -54,7 +54,7 @@ Fee: " FEE
                                 #echo "➤ Prev Seq: $SEQ1 "
                                 #echo "➤ Next Seq: $SEQUENCE1 "
                                 echo ""
-                                echo $passphrase|gaiacli tx staking delegate --from="CypherCore" --validator="cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs" --chain-id=$CHAINID --amount="$STAKE""stake" #--fee="$FEE""photinos" --sequence=$SEQUENCE1
+                                echo $passphrase|gaiacli tx staking delegate --from="CypherCore" cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs --chain-id=$CHAINID "$STAKE""stake" --async #--fee="$FEE""photinos" --sequence=$SEQUENCE1
                                 sleep 10s
                                 echo ""
                                 VOTINGPOWER="`gaiacli status | jq ".validator_info.voting_power" | bc`"
