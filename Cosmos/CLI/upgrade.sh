@@ -86,6 +86,13 @@ echo "-----------------------------------------"
 echo "              Make & Install             "
 echo "-----------------------------------------"
 make update_tools && make get_vendor_deps && make install
+if [ -e "$GOPATH/bin/gaiad" ]
+then
+    echo "-----------------------------------------"
+    echo "                 Reset                   "
+    echo "-----------------------------------------"
+    gaiad unsafe-reset-all
+fi
 echo "-----------------------------------------"
 echo "            Fetch genesis.json           "
 echo "-----------------------------------------"
