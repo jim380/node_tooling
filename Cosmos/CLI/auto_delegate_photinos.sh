@@ -15,7 +15,7 @@ Fee: " FEE
                 echo ""
                 echo "➤ Fee has been set to $FEE photinos."
                 # STEAK=`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.coins" | jq ".[0].amount" | bc`
-                ASSET="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node --output=json | jq ".value.BaseVestingAccount.BaseAccount.coins" | jq ".[1].denom"| bc`"
+                ASSET="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node --output=json | jq ".value.BaseVestingAccount.BaseAccount.coins" | jq ".[1].amount"| bc`"
                 if [  $ASSET == "0" ]
                 then
                         echo ""
