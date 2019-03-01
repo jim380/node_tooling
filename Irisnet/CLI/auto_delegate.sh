@@ -1,20 +1,25 @@
 #!/bin/bash
+# install python if you haven't. sudo apt-get install python
 function pause {
  read -n1 -rsp $'Press any key to continue or Ctrl+C to exit...\n'
 }
 
 while true
         do
-                CHAINID=game_of_stakes_6
                 echo "----------------------------------"
                 echo "|           User Input           |"  
                 echo "----------------------------------"
+                read -p "Chain-id: " CHAINID
+                echo "➤ Chain-id has been set to $CHAINID"
                 read -s -p "Passphrase: " passphrase
                 read -p "
 Fee: " FEE
                 echo ""
-                echo "➤ Fee has been set to $FEE photinos."
-                ASSET="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node --output=json | jq ".value.BaseVestingAccount.BaseAccount.coins" | jq ".[1].amount"| bc`"
+                echo "➤ Fee has been set to $FEE iris."
+                delegateAddr="iaa1kfhee2nqrg64krqa97q3ufw9d0phzp3j83mhg4"
+                validatorAddr="iva1kfhee2nqrg64krqa97q3ufw9d0phzp3jjq3c4j"
+                KEYNAME="Cypher Core-5CCA4F526B9F85DA"
+                ASSET="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`" 
                	if [  $ASSET == "0" ]
                 then
                         echo ""
@@ -22,8 +27,8 @@ Fee: " FEE
                         echo ""
                         pause   
                 else
-                STAKE="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node --output=json | jq ".value.BaseVestingAccount.BaseAccount.coins" | jq ".[1].amount" | bc`"
-                while [[ $STAKE -ne 0 ]]
+                STAKE="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
+                while [ $STAKE != "0" ]
                         do
                                 echo "➤ Stake available pre-withdrawl: $STAKE "
                                 echo ""
@@ -36,7 +41,7 @@ Fee: " FEE
                                 echo "----------------------------------"
                                 #echo "➤ Prev Seq: $SEQ "
                                 #echo "➤ Next Seq: $SEQUENCE "
-                                echo $passphrase|gaiacli tx distr withdraw-rewards --chain-id=$CHAINID cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs --from="CypherCore" --commission --async --fees="$FEE""photinos"
+                                echo $passphrase|iriscli distribution withdraw-rewards --chain-id=$CHAINID --from="$KEYNAME" --fee=$FEE"iris"
                                 sleep 30s
                                 echo ""
                                 echo "➤ Stake available post-withdrawl: $STAKE "
@@ -46,17 +51,19 @@ Fee: " FEE
                                 echo "----------------------------------"
                                 echo "|            Delegate            |"
                                 echo "----------------------------------"
-                                #STAKE="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node --output=json | jq ".value.BaseVestingAccount.BaseAccount.coins" | jq ".[1].amount" | bc`"
+                                #STAKE="`iriscli bank account --chain-id=$CHAINID faa1kfhee2nqrg64krqa97q3ufw9d0phzp3jl7a0gg | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
+                                delegateStake=`python -c "print $STAKE - $FEE"`
+                                echo "Stake: $STAKE; Fee: $FEE; Delegated Stake: $delegateStake"
                                 #SEQ1="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.sequence" | bc`"
                                 #SEQUENCE1=$(($SEQ1 + 1))
                                 echo ""
                                 #echo "➤ Prev Seq: $SEQ1 "
                                 #echo "➤ Next Seq: $SEQUENCE1 "
                                 echo ""
-                                echo $passphrase|gaiacli tx staking delegate --from="CypherCore" cosmosvaloper1pjmngrwcsatsuyy8m3qrunaun67sr9x7z5r2qs --chain-id=$CHAINID "$STAKE""stake" --async --fees="$FEE""photinos" #--sequence=$SEQUENCE1
+                                echo $passphrase|iriscli stake delegate --from="Cypher Core-5CCA4F526B9F85DA" --address-validator=$validatorAddr --chain-id=$CHAINID --amount="$delegateStake""iris" --fee=$FEE"iris" #--sequence=$SEQUENCE1
                                 sleep 10s
                                 echo ""
-                                VOTINGPOWER="`gaiacli status | jq ".validator_info.voting_power" | bc`"
+                                VOTINGPOWER="`iriscli status | jq ".validator_info.voting_power" | bc`"
                                 echo "➤ Voting Power: $VOTINGPOWER "
                                 echo ""
                                 #pause

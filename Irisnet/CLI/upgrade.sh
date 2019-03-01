@@ -26,20 +26,20 @@
 #  
 #  ============================================================================
 function preparation {
-    if test -e $HOME/.gaiad/config/addrbook.json && test -e $HOME/.gaiad/config/genesis.json
+    if test -e $HOME/.iris/config/addrbook.json && test -e $HOME/.iris/config/genesis.json
     then
         echo "-----------------------------------------"
         echo "Remove addrbook.json and genesis.json"
         echo "-----------------------------------------"
-        rm $HOME/.gaiad/config/addrbook.json $HOME/.gaiad/config/genesis.json
+        rm $HOME/.iris/config/addrbook.json $HOME/.iris/config/genesis.json
     fi
 
-    if test -e $GOPATH/src/github.com/cosmos/cosmos-sdk/Gopkg.lock
+    if test -e $GOPATH/src/github.com/irisnet/irishub/Gopkg.lock
     then
         echo "-----------------------------------------"
         echo "            Remove Gopkg.lock            "
         echo "-----------------------------------------"
-        rm $GOPATH/src/github.com/cosmos/cosmos-sdk/Gopkg.lock
+        rm $GOPATH/src/github.com/irisnet/irishub/Gopkg.lock
     fi
 }
 
@@ -47,7 +47,7 @@ function binary {
     echo "-----------------------------------------"
     echo "             Update Binary               "
     echo "-----------------------------------------"
-    REPO=$GOPATH/src/github.com/cosmos/cosmos-sdk
+    REPO=$GOPATH/src/github.com/irisnet/irishub
     if [ -d "$REPO" ]
     then
         cd $REPO
@@ -77,7 +77,7 @@ function binary {
     echo "                 Checkout                "
     echo "-----------------------------------------"
     test -z ${CHECKOUT_VERSION} && read -p "What version would you like to checkout?
-Enter 'master' or specify a version number (e.g. 'v0.28.0')
+Enter 'master' or specify a version number (e.g. 'v0.12.0')
 " CHECKOUT_VERSION
     echo "Installing $CHECKOUT_VERSION"
     git checkout $CHECKOUT_VERSION
@@ -88,12 +88,12 @@ Enter 'master' or specify a version number (e.g. 'v0.28.0')
 }
 
 function reset {
-    if [ -e "$GOPATH/bin/gaiad" ]
+    if [ -e "$GOPATH/bin/iris" ]
     then
         echo "-----------------------------------------"
         echo "                 Reset                   "
         echo "-----------------------------------------"
-        gaiad unsafe-reset-all
+        iris unsafe-reset-all
     fi
 }
 
@@ -104,22 +104,22 @@ function genesis {
     test -z ${GENESIS} && read -p "Link to genesis.json in raw format
 " GENESIS
     echo ""
-    if ! test -d $HOME/.gaiad/config
+    if ! test -d $HOME/.iris/config
     then
-        mkdir -p $HOME/.gaiad/config
+        mkdir -p $HOME/.iris/config
     fi
-    curl $GENESIS > $HOME/.gaiad/config/genesis.json
+    curl $GENESIS > $HOME/.iris/config/genesis.json
 }
 
 function version {
     echo "-----------------------------------------"
-    echo "               gaiad version             "
+    echo "               iris version             "
     echo "-----------------------------------------"
-    gaiad version
+    iris version
     echo "-----------------------------------------"
-    echo "              gaiacli version"
+    echo "              iriscli version"
     echo "-----------------------------------------"
-    gaiacli version
+    iriscli version
 }
 
 preparation
