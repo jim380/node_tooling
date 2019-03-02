@@ -4,73 +4,85 @@ function pause {
  read -n1 -rsp $'Press any key to continue or Ctrl+C to exit...\n'
 }
 
-while true
-        do
                 echo "----------------------------------"
                 echo "|           User Input           |"  
                 echo "----------------------------------"
                 read -p "Chain-id: " CHAINID
                 echo "➤ Chain-id has been set to $CHAINID"
+                echo ""
                 read -s -p "Passphrase: " passphrase
+                echo ""
                 read -p "
 Fee: " FEE
-                echo ""
                 echo "➤ Fee has been set to $FEE iris."
+                echo ""
+                read -p "Delegate ratio (e.g. 0.5): " delegateRatio
+                echo "➤ Delegate ratio has been set to $delegateRatio."
+                echo ""
                 delegateAddr="iaa1kfhee2nqrg64krqa97q3ufw9d0phzp3j83mhg4"
                 validatorAddr="iva1kfhee2nqrg64krqa97q3ufw9d0phzp3jjq3c4j"
                 KEYNAME="Cypher Core-5CCA4F526B9F85DA"
-                ASSET="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`" 
-               	if [  $ASSET == "0" ]
+                echo "----------------------------------"
+                echo "|        Staring in 3 sec         |"  
+                echo "----------------------------------"
+                sleep 3s
+while true
+        do
+                currentBalance="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
+                isEnough=`python -c "print $currentBalance > $FEE"`
+               	if [  $isEnough == "False" ]
                 then
                         echo ""
-                        echo "➤ No STAKE available in balance to be delegated yet."
+                        echo "➤ Not enough stake to pay for fees."
                         echo ""
-                        pause   
                 else
-                STAKE="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
-                while [ $STAKE != "0" ]
-                        do
-                                echo "➤ Stake available pre-withdrawl: $STAKE "
+                        STAKE_PRE="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
+                        isEnoughWithdraw=`python -c "print $STAKE_PRE > $FEE"`
+                        if [ $isEnoughWithdraw == "True" ]
+                        then
+                                echo ""
+                                echo "➤ Current balance: $STAKE_PRE "
                                 echo ""
                                 echo "✓✓✓"
                                 echo ""
-                                #SEQ="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.sequence" | bc`"
-                                #SEQUENCE=$(($SEQ + 1))
                                 echo "----------------------------------"
                                 echo "|            Withdraw            |"
                                 echo "----------------------------------"
-                                #echo "➤ Prev Seq: $SEQ "
-                                #echo "➤ Next Seq: $SEQUENCE "
                                 echo $passphrase|iriscli distribution withdraw-rewards --chain-id=$CHAINID --from="$KEYNAME" --fee=$FEE"iris"
-                                sleep 30s
                                 echo ""
-                                echo "➤ Stake available post-withdrawl: $STAKE "
+                                echo "➤ Withdrawal completed. Holding for 15 sec to update balance."
+                                sleep 15s
+                                echo ""
+                                STAKE_POST="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
+                                echo "➤ Balance post-withdrawl: $STAKE_POST "
                                 echo ""
                                 echo "✓✓✓"
                                 echo ""
                                 echo "----------------------------------"
                                 echo "|            Delegate            |"
                                 echo "----------------------------------"
-                                #STAKE="`iriscli bank account --chain-id=$CHAINID faa1kfhee2nqrg64krqa97q3ufw9d0phzp3jl7a0gg | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
-                                delegateStake=`python -c "print $STAKE - $FEE"`
-                                echo "Stake: $STAKE; Fee: $FEE; Delegated Stake: $delegateStake"
-                                #SEQ1="`gaiacli query account --chain-id=$CHAINID cosmos1pjmngrwcsatsuyy8m3qrunaun67sr9x78qhlvr --trust-node | jq ".value.sequence" | bc`"
-                                #SEQUENCE1=$(($SEQ1 + 1))
+                                STAKE="`iriscli bank account --chain-id=$CHAINID $delegateAddr | jq ".coins[0]" | bc | sed -e 's/\(.*\)iris/\1/'`"
+                                delegateStake=`python -c "print $STAKE*$delegateRatio"`
                                 echo ""
-                                #echo "➤ Prev Seq: $SEQ1 "
-                                #echo "➤ Next Seq: $SEQUENCE1 "
+                                echo "➤ Stake: $STAKE; Fee: $FEE; Delegat amount: $delegateStake"
                                 echo ""
-                                echo $passphrase|iriscli stake delegate --from="Cypher Core-5CCA4F526B9F85DA" --address-validator=$validatorAddr --chain-id=$CHAINID --amount="$delegateStake""iris" --fee=$FEE"iris" #--sequence=$SEQUENCE1
-                                sleep 10s
-                                echo ""
-                                VOTINGPOWER="`iriscli status | jq ".validator_info.voting_power" | bc`"
-                                echo "➤ Voting Power: $VOTINGPOWER "
-                                echo ""
-                                #pause
-                                sleep 600s
-                done
-                echo ""
-                pause
-                #sleep 12000
+                                isEnoughDelegate=`python -c "print $delegateStake > $FEE"`
+                                if [ $isEnoughDelegate == "True" ]
+                                then
+                                        echo $passphrase|iriscli stake delegate --from="$KEYNAME" --address-validator=$validatorAddr --chain-id=$CHAINID --amount="$delegateStake""iris" --fee=$FEE"iris" #--sequence=$SEQUENCE1
+                                        echo ""
+                                        echo "➤ Delegate completed. Holding for 15 sec to update voting power."
+                                        sleep 15s
+                                        VOTINGPOWER="`iriscli status | jq ".validator_info.voting_power" | bc`"
+                                        echo ""
+                                        echo "➤ Voting Power: $VOTINGPOWER"
+
+                                else 
+                                        echo "Delegate amount is enough to pay for fees."
+                                fi
+                        fi
                 fi
+                echo ""
+                echo "Sleeping for 1 hr"
+                sleep 600s
         done
