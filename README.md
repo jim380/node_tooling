@@ -5,6 +5,11 @@
 `$ chmod +x script.sh`<br>
 `$ ./script.sh`<br>
 
+### Server Initialization
+`$ wget https://raw.githubusercontent.com/jim380/node_tooling/master/Init/addUser.sh`<br>
+`$ chmod +x addUser.sh`<br>
+`$ ./addUser.sh`<br>
+
 ### Install Golang
 `$ wget https://raw.githubusercontent.com/jim380/node_tooling/master/Cosmos/CLI/go_install.sh`<br>
 `$ chmod +x go_install.sh`<br>
