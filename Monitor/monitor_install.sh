@@ -111,7 +111,7 @@ function installGrafana {
         popd
         cd ~
         success
-        #exit 0
+        exit 0
     fi
 }
 
