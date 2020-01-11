@@ -53,7 +53,8 @@ func main() {
 	chainDataDel(machine)
 	nodeRun(machine)
 	accountReg(machine)
-	// args := []string{"HOME", "TEST"}
+
+	// args := []string{"HHHOME", "TEST"}
 	// envExists(args)
 }
 
@@ -136,47 +137,59 @@ func keyCheck(target string) {
 	}
 }
 
+func changeDir(dir string) {
+	homeDir := os.Getenv("HOME")
+	fullDir := homeDir + dir
+	fmt.Println("\n------------------------------------------")
+	fmt.Printf("Changing directory to \"%s\"", fullDir)
+	fmt.Println("\n------------------------------------------")
+	if err := os.Chdir(fullDir); err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Printf("Ran successfully")
+	}
+}
+
 func executeCmd(cmd string) {
 	if runtime.GOOS == "windows" {
 		//cmd = exec.Command("tasklist")
 		fmt.Println("You need to switch to Linus, stoopid!")
 	}
-
-	command := exec.Command("sh", "-c", cmd)
 	cmdString := "\"$ " + cmd + "\""
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
 	fmt.Println("\n------------------------------------------")
 	fmt.Printf("Executing %s", cmdString)
 	fmt.Println("\n------------------------------------------")
-	err := command.Run()
+	output, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		log.Fatalf("%s failed with %s\n", cmdString, err)
-		return
+		log.Fatal(err)
 	}
-	fmt.Println("Success!")
+	if string(output) != "" {
+		fmt.Printf("Output: %s\n", output)
+	}
+	fmt.Println("Ran successfully")
+
 }
 
 func chainDataDel(target string) {
 	switch target {
 	case "local":
 		fmt.Printf("\nDeleting chain data on %s machine", target)
-		executeCmd("cd ~/Documents/celo-accounts-node")
+		changeDir("/Documents/celo-accounts-node")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 	case "validator":
 		fmt.Printf("\nDeleting chain data on %s machine", target)
-		executeCmd("cd ~/Documents/celo-validator-node")
+		changeDir("/Documents/celo-validator-node")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 	case "proxy":
 		fmt.Printf("\nDeleting chain data on %s machine", target)
-		executeCmd("cd ~/Documents/celo-proxy-node")
+		changeDir("/Documents/celo-proxy-node")
 		executeCmd("mv geth/nodekey nodekey")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 		executeCmd("mkdir geth")
 		executeCmd("mv nodekey geth/nodekey")
 	case "attestation":
 		fmt.Printf("\nDeleting chain data on %s machine", target)
-		executeCmd("cd ~/Documents/celo-attestations-node")
+		changeDir("/Documents/celo-attestations-node")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 	}
 }
@@ -192,12 +205,12 @@ func nodeRun(target string) {
 
 	case "validator":
 		fmt.Printf("\nStarting node on %s machine", target)
-		executeCmd("cd ~/Documents/celo-validator-node")
+		changeDir("/Documents/celo-validator-node")
 		executeCmd("docker run -v $PWD:/root/.celo --rm -it $CELO_IMAGE init /celo/genesis.json")
 		executeCmd("docker run --name celo-validator -dt --restart always -p 30303:30303 -p 30303:30303/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --mine --istanbul.blockperiod=5 --istanbul.requesttimeout=3000 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --nodiscover --proxy.proxied --proxy.proxyenodeurlpair=enode://$PROXY_ENODE@$PROXY_INTERNAL_IP:30503\\;enode://$PROXY_ENODE@$PROXY_EXTERNAL_IP:30303  --unlock=$CELO_VALIDATOR_SIGNER_ADDRESS --password /root/.celo/.password --ethstats=$VALIDATOR_NAME@baklava-ethstats.celo-testnet.org")
 	case "proxy":
 		fmt.Printf("\nStarting node on %s machine", target)
-		executeCmd("cd ~/Documents/celo-proxy-node")
+		changeDir("/Documents/celo-proxy-node")
 		executeCmd("docker run -v $PWD:/root/.celo --rm -it $CELO_IMAGE init /celo/genesis.json")
 		executeCmd("export BOOTNODE_ENODES=`docker run --rm --entrypoint cat $CELO_IMAGE /celo/bootnodes`")
 		executeCmd("docker run --name celo-proxy -dt --restart always -p 30303:30303 -p 30303:30303/udp -p 30503:30503 -p 30503:30503/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --proxy.proxy --proxy.proxiedvalidatoraddress $CELO_VALIDATOR_SIGNER_ADDRESS --proxy.internalendpoint :30503 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --bootnodes $BOOTNODE_ENODES --ethstats=$VALIDATOR_NAME-proxy@baklava-ethstats.celo-testnet.org")
