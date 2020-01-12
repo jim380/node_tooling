@@ -49,10 +49,10 @@ func main() {
 		" " + "Proxy\n4) Attestation\n\nEnter down below (e.g. \"1\" or \"Local\"): "
 	machine = inputReader(message, machine)
 	nodeStop(machine)
-	keyCheck(machine)
+	// keyCheck(machine)
 	chainDataDel(machine)
 	nodeRun(machine)
-	accountReg(machine)
+	// accountReg(machine)
 
 	// args := []string{"HHHOME", "TEST"}
 	// envExists(args)
@@ -146,7 +146,7 @@ func changeDir(dir string) {
 	if err := os.Chdir(fullDir); err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Printf("Ran successfully")
+		fmt.Println("\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
 	}
 }
 
@@ -160,14 +160,20 @@ func executeCmd(cmd string) {
 	fmt.Printf("Executing %s", cmdString)
 	fmt.Println("\n------------------------------------------")
 	output, err := exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
 	if string(output) != "" {
 		fmt.Printf("Output: %s\n", output)
 	}
-	fmt.Println("Ran successfully")
-
+	if err != nil {
+		// switch err.Error() {
+		// case "Error response from daemon: No such container: celo-accounts":
+		// 	fmt.Printf("error has occurred.")
+		// default:
+		// 	log.Fatal(err)
+		// }
+		fmt.Println("Error:", err.Error())
+	} else {
+		fmt.Println("\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
+	}
 }
 
 func chainDataDel(target string) {
@@ -175,7 +181,7 @@ func chainDataDel(target string) {
 	case "local":
 		fmt.Printf("\nDeleting chain data on %s machine", target)
 		changeDir("/Documents/celo-accounts-node")
-		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
+		executeCmd("sudo rm -rf geth*")
 	case "validator":
 		fmt.Printf("\nDeleting chain data on %s machine", target)
 		changeDir("/Documents/celo-validator-node")
@@ -239,7 +245,7 @@ func envExists(envs []string) bool {
 func nodeStop(target string) {
 	switch target {
 	case "local":
-		fmt.Printf("\nStoping node on %s machine", target)
+		fmt.Printf("\nStopping node on %s machine", target)
 		executeCmd("docker stop celo-accounts && docker rm celo-accounts")
 	case "validator":
 		fmt.Printf("\nStoping node on %s machine", target)
