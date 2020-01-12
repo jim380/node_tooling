@@ -87,10 +87,9 @@ func setEnv() {
 	celoValName := os.Getenv("VALIDATOR_NAME")
 	os.Setenv("VALIDATOR_NAME", celoValName)
 
-	if celoImage == "" || networkID == "" {
-		log.Fatal("Missing fields in .env file")
-	}
-	// fmt.Println(celoImage)
+	// if celoImage == "" || networkID == "" {
+	// 	log.Fatal("Missing fields in .env file")
+	// }
 }
 
 func inputReader(msg string, target string) string {
@@ -104,16 +103,16 @@ func inputReader(msg string, target string) string {
 	switch strings.TrimSpace(target) {
 	case "1", "Local", "local":
 		target = "local"
-		fmt.Println(target, "machine selected")
+		fmt.Println("\n", target, "machine selected")
 	case "2", "Validator", "validator":
 		target = "validator"
-		fmt.Println(target, "machine selected")
+		fmt.Println("\n", target, "machine selected")
 	case "3", "Proxy", "proxy":
 		target = "proxy"
-		fmt.Println(target, "machine selected")
+		fmt.Println("\n", target, "machine selected")
 	case "4", "Attestation", "attestation":
 		target = "attestation"
-		fmt.Println(target, "machine selected")
+		fmt.Println("\n", target, "machine selected")
 	default:
 		t := strings.TrimSpace(target)
 		fmt.Println(t, "is not a valid input")
@@ -140,29 +139,27 @@ func keyCheck(target string) {
 func changeDir(dir string) {
 	homeDir := os.Getenv("HOME")
 	fullDir := homeDir + dir
-	fmt.Println("\n------------------------------------------")
-	fmt.Printf("Changing directory to \"%s\"", fullDir)
-	fmt.Println("\n------------------------------------------")
+	fmt.Println("\nChanging directory to \"", fullDir, "\"")
 	if err := os.Chdir(fullDir); err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println("\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
+		fmt.Println("\n\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
+		fmt.Println("-----")
 	}
 }
 
 func executeCmd(cmd string) {
+	// setEnv()
 	if runtime.GOOS == "windows" {
 		//cmd = exec.Command("tasklist")
-		fmt.Println("You need to switch to Linus, stoopid!")
+		fmt.Println("You need to switch to Linux, stoopid!")
 	}
 	cmdString := "\"$ " + cmd + "\""
-	fmt.Println("\n------------------------------------------")
-	fmt.Printf("Executing %s", cmdString)
-	fmt.Println("\n------------------------------------------")
-	output, err := exec.Command("sh", "-c", cmd).Output()
-	if string(output) != "" {
-		fmt.Printf("Output: %s\n", output)
-	}
+	fmt.Println("\nExecuting ", cmdString)
+	output, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+	// if string(output) != "" {
+	// 	fmt.Printf("Output: %s\n", output)
+	// }
 	if err != nil {
 		// switch err.Error() {
 		// case "Error response from daemon: No such container: celo-accounts":
@@ -170,56 +167,77 @@ func executeCmd(cmd string) {
 		// default:
 		// 	log.Fatal(err)
 		// }
-		fmt.Println("Error:", err.Error())
+		//fmt.Println("Error:", err.Error())
+		//log.Fatal(err)
+		fmt.Println("\n", fmt.Sprint(err) + ": " + string(output))
 	} else {
-		fmt.Println("\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
+		if string(output) != "" {
+			fmt.Println("\nOutput=>", string(output))
+		}
+		fmt.Println("\n\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
+		fmt.Println("-----")
 	}
 }
 
 func chainDataDel(target string) {
+	titlePrint("delete", target)
 	switch target {
 	case "local":
-		fmt.Printf("\nDeleting chain data on %s machine", target)
 		changeDir("/Documents/celo-accounts-node")
 		executeCmd("sudo rm -rf geth*")
 	case "validator":
-		fmt.Printf("\nDeleting chain data on %s machine", target)
 		changeDir("/Documents/celo-validator-node")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 	case "proxy":
-		fmt.Printf("\nDeleting chain data on %s machine", target)
 		changeDir("/Documents/celo-proxy-node")
 		executeCmd("mv geth/nodekey nodekey")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 		executeCmd("mkdir geth")
 		executeCmd("mv nodekey geth/nodekey")
 	case "attestation":
-		fmt.Printf("\nDeleting chain data on %s machine", target)
 		changeDir("/Documents/celo-attestations-node")
 		executeCmd("sudo rm -rf geth* && sudo rm static-nodes.json")
 	}
 }
 
+func titlePrint(action string, target string) {
+	switch action {
+	case "stop":
+		title := "Stopping node on"
+		fmt.Println("\n---------------------------------------------------")
+		fmt.Printf("	%s %s machine", title, target)
+		fmt.Println("\n---------------------------------------------------")
+	case "delete":
+		title := "Deleting chain data on"
+		fmt.Println("\n---------------------------------------------------")
+		fmt.Printf("	%s %s machine", title, target)
+		fmt.Println("\n---------------------------------------------------")
+	case "start":
+		title := "Starting node on"
+		fmt.Println("\n---------------------------------------------------")
+		fmt.Printf("	%s %s machine", title, target)
+		fmt.Println("\n---------------------------------------------------")
+	}
+}
+
 func nodeRun(target string) {
+	titlePrint("start", target)
 	executeCmd("docker pull $CELO_IMAGE")
 	switch target {
 	case "local":
-		fmt.Printf("\nStarting node on %s machine", target)
-		executeCmd("docker run -v $PWD:/root/.celo --rm -it $CELO_IMAGE init /celo/genesis.json")
-		executeCmd("docker run -v $PWD:/root/.celo --rm -it --entrypoint cp $CELO_IMAGE /celo/static-nodes.json /root/.celo/")
-		executeCmd("docker run --name celo-accounts -dt --restart always -p 127.0.0.1:8545:8545 -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --rpc --rpcaddr 0.0.0.0 --rpcapi eth,net,web3,debug,admin,personal")
+		executeCmd("docker run -v $PWD:/root/.celo --rm -i $CELO_IMAGE init /celo/genesis.json")
+		executeCmd("docker run -v $PWD:/root/.celo --rm -i --entrypoint cp $CELO_IMAGE /celo/static-nodes.json /root/.celo/")
+		executeCmd("docker run --name celo-accounts -d --restart always -p 127.0.0.1:8545:8545 -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --rpc --rpcaddr 0.0.0.0 --rpcapi eth,net,web3,debug,admin,personal")
 
 	case "validator":
-		fmt.Printf("\nStarting node on %s machine", target)
 		changeDir("/Documents/celo-validator-node")
-		executeCmd("docker run -v $PWD:/root/.celo --rm -it $CELO_IMAGE init /celo/genesis.json")
-		executeCmd("docker run --name celo-validator -dt --restart always -p 30303:30303 -p 30303:30303/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --mine --istanbul.blockperiod=5 --istanbul.requesttimeout=3000 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --nodiscover --proxy.proxied --proxy.proxyenodeurlpair=enode://$PROXY_ENODE@$PROXY_INTERNAL_IP:30503\\;enode://$PROXY_ENODE@$PROXY_EXTERNAL_IP:30303  --unlock=$CELO_VALIDATOR_SIGNER_ADDRESS --password /root/.celo/.password --ethstats=$VALIDATOR_NAME@baklava-ethstats.celo-testnet.org")
+		executeCmd("docker run -v $PWD:/root/.celo --rm -i $CELO_IMAGE init /celo/genesis.json")
+		executeCmd("docker run --name celo-validator -d --restart always -p 30303:30303 -p 30303:30303/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --mine --istanbul.blockperiod=5 --istanbul.requesttimeout=3000 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --nodiscover --proxy.proxied --proxy.proxyenodeurlpair=enode://$PROXY_ENODE@$PROXY_INTERNAL_IP:30503\\;enode://$PROXY_ENODE@$PROXY_EXTERNAL_IP:30303  --unlock=$CELO_VALIDATOR_SIGNER_ADDRESS --password /root/.celo/.password --ethstats=$VALIDATOR_NAME@baklava-ethstats.celo-testnet.org")
 	case "proxy":
-		fmt.Printf("\nStarting node on %s machine", target)
 		changeDir("/Documents/celo-proxy-node")
-		executeCmd("docker run -v $PWD:/root/.celo --rm -it $CELO_IMAGE init /celo/genesis.json")
+		executeCmd("docker run -v $PWD:/root/.celo --rm -i $CELO_IMAGE init /celo/genesis.json")
 		executeCmd("export BOOTNODE_ENODES=`docker run --rm --entrypoint cat $CELO_IMAGE /celo/bootnodes`")
-		executeCmd("docker run --name celo-proxy -dt --restart always -p 30303:30303 -p 30303:30303/udp -p 30503:30503 -p 30503:30503/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --proxy.proxy --proxy.proxiedvalidatoraddress $CELO_VALIDATOR_SIGNER_ADDRESS --proxy.internalendpoint :30503 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --bootnodes $BOOTNODE_ENODES --ethstats=$VALIDATOR_NAME-proxy@baklava-ethstats.celo-testnet.org")
+		executeCmd("docker run --name celo-proxy -d --restart always -p 30303:30303 -p 30303:30303/udp -p 30503:30503 -p 30503:30503/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --proxy.proxy --proxy.proxiedvalidatoraddress $CELO_VALIDATOR_SIGNER_ADDRESS --proxy.internalendpoint :30503 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --bootnodes $BOOTNODE_ENODES --ethstats=$VALIDATOR_NAME-proxy@baklava-ethstats.celo-testnet.org")
 	case "attestation":
 		url := "https://docs.celo.org/getting-started/baklava-testnet/running-a-validator#running-the-attestation-service"
 		fmt.Printf("\nPlease check here ($%s) for instructions on setting up an %s machine", url, target)
@@ -243,18 +261,15 @@ func envExists(envs []string) bool {
 }
 
 func nodeStop(target string) {
+	titlePrint("stop", target)
 	switch target {
 	case "local":
-		fmt.Printf("\nStopping node on %s machine", target)
 		executeCmd("docker stop celo-accounts && docker rm celo-accounts")
 	case "validator":
-		fmt.Printf("\nStoping node on %s machine", target)
 		executeCmd("docker stop celo-validator && docker rm celo-validator")
 	case "proxy":
-		fmt.Printf("\nStoping node on %s machine", target)
 		executeCmd("docker stop celo-proxy && docker rm celo-proxy")
 	case "attestation":
-		fmt.Printf("\nStoping node on %s machine", target)
 		executeCmd("docker stop celo-attestations && docker rm celo-attestations")
 		executeCmd("docker stop celo-attestation-service && docker rm celo-attestation-service")
 	}
