@@ -9,3 +9,9 @@
 5. `$ go build`
 6. `$ ./Celo`
 7. Profit !
+
+## Sample Outputs
+* [Account](https://pastebin.com/aRW2Txv3)
+* [Validator](https://pastebin.com/Zq6PrFg5)
+* [Proxy](https://pastebin.com/Bbg8NnFh)
+* Attestation --- TODO

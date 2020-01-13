@@ -19,12 +19,14 @@ func NodeRun(target string) {
 		util.ExecuteCmd("docker run --name celo-accounts -d --restart always -p 127.0.0.1:8545:8545 -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --rpc --rpcaddr 0.0.0.0 --rpcapi eth,net,web3,debug,admin,personal")
 
 	case "validator":
-		util.ChangeDir("/Documents/celo-validator-node")
+		workingDir := os.Getenv("CELO_VALIDATOR_DIR")
+        util.ChangeDir(workingDir)
 		util.ExecuteCmd("docker run -v $PWD:/root/.celo --rm -i $CELO_IMAGE init /celo/genesis.json")
 		util.ExecuteCmd("docker run --name celo-validator -d --restart always -p 30303:30303 -p 30303:30303/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --mine --istanbul.blockperiod=5 --istanbul.requesttimeout=3000 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --nodiscover --proxy.proxied --proxy.proxyenodeurlpair=enode://$PROXY_ENODE@$PROXY_INTERNAL_IP:30503\\;enode://$PROXY_ENODE@$PROXY_EXTERNAL_IP:30303  --unlock=$CELO_VALIDATOR_SIGNER_ADDRESS --password /root/.celo/.password --ethstats=$VALIDATOR_NAME@baklava-ethstats.celo-testnet.org")
 
 	case "proxy":
-		util.ChangeDir("/Documents/celo-proxy-node")
+		workingDir := os.Getenv("CELO_PROXY_DIR")
+        util.ChangeDir(workingDir)
 		util.ExecuteCmd("docker run -v $PWD:/root/.celo --rm -i $CELO_IMAGE init /celo/genesis.json")
 		util.ExecuteCmd("export BOOTNODE_ENODES=`docker run --rm --entrypoint cat $CELO_IMAGE /celo/bootnodes`")
 		util.ExecuteCmd("docker run --name celo-proxy -d --restart always -p 30303:30303 -p 30303:30303/udp -p 30503:30503 -p 30503:30503/udp -v $PWD:/root/.celo $CELO_IMAGE --verbosity 3 --networkid $NETWORK_ID --syncmode full --proxy.proxy --proxy.proxiedvalidatoraddress $CELO_VALIDATOR_SIGNER_ADDRESS --proxy.internalendpoint :30503 --etherbase $CELO_VALIDATOR_SIGNER_ADDRESS --bootnodes $BOOTNODE_ENODES --ethstats=$VALIDATOR_NAME-proxy@baklava-ethstats.celo-testnet.org")
