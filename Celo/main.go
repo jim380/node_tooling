@@ -28,6 +28,7 @@ package main
 
 import (
 	"log"
+	"flag"
 
 	"github.com/joho/godotenv"
 	"github.com/node_tooling/Celo/action"
@@ -36,16 +37,31 @@ import (
 
 func main() {
 	var machine string
-	err := godotenv.Load("config.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	var cmdInput bool
+
+	flag.BoolVar(&cmdInput, "cmd", false, "Show election details")
+	flag.Parse()
+
+	if cmdInput {
+		err := godotenv.Load("config.env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		util.SetEnv()
+		util.CmdAll()	
+	} else if !cmdInput {
+		//fmt.Println("Invalid flag value. flag.Args() is:", flag.Args())
+		err := godotenv.Load("config.env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		util.SetEnv()
+		message := "Which machine are you on:\n\n1) Local\n2) Validator\n3)" +
+			" " + "Proxy\n4) Attestation\n\nEnter down below (e.g. \"1\" or \"Local\"): "
+		machine = util.InputReader(message, machine)
+		action.NodeStop(machine)
+		action.KeyCheck(machine)
+		action.ChainDataDel(machine)
+		action.NodeRun(machine)
 	}
-	util.SetEnv()
-	message := "Which machine are you on:\n\n1) Local\n2) Validator\n3)" +
-		" " + "Proxy\n4) Attestation\n\nEnter down below (e.g. \"1\" or \"Local\"): "
-	machine = util.InputReader(message, machine)
-	action.NodeStop(machine)
-	action.KeyCheck(machine)
-	action.ChainDataDel(machine)
-	action.NodeRun(machine)
 }
