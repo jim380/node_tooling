@@ -92,7 +92,7 @@ func OptionsAll() {
 	for ifContinue {
 		message := "\nWhat would you like?\n\n1) Election Show\n2) Account Balance\n" +
 			"3) Account Show\n4) Lockgold Show\n5) Validator Show\n6) Validator Status\n" +
-			"7) Get Metadata\n" +
+			"7) Get Metadata\n8) Node Synced\n" +
 			"\nEnter down below (e.g. \"1\"): "
 		fmt.Println(message)
 		fmt.Printf("=> ")
@@ -105,12 +105,15 @@ func OptionsAll() {
 				ExecuteCmd("celocli election:show $CELO_VALIDATOR_GROUP_ADDRESS --voter")
 				ExecuteCmd("celocli election:show $CELO_VALIDATOR_ADDRESS --voter")
 			case "2":
-				// ExecuteCmd("celocli node:synced")
-				gold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				LockGold(gold, "gold")
+				valGrGold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+				lockGold(valGrGold, "gold")
+				valGold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
+				lockGold(valGold, "gold")
 
-				usd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				amoutAvailable(usd, "usd")
+				valGrUsd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+				amoutAvailable(valGrUsd, "usd")
+				valUsd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
+				amoutAvailable(valUsd, "usd")
 			case "3":
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_GROUP_ADDRESS")
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_ADDRESS")
@@ -124,6 +127,8 @@ func OptionsAll() {
 				ExecuteCmd("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS")
 			case "7":
 				ExecuteCmd("celocli account:get-metadata $CELO_VALIDATOR_ADDRESS")
+			case "8":
+			ExecuteCmd("celocli node:synced")
 			}
 			break
 		}
