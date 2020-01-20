@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// ChangeDir changes the working dir to a specified dir
 func ChangeDir(dir string) {
 	// homeDir := os.Getenv("HOME")
 	// fullDir := homeDir + dir

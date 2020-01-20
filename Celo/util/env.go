@@ -2,6 +2,7 @@ package util
 
 import "os"
 
+// SetEnv sets the necessary env variables
 // needs a rewrite. too tired to do it today
 func SetEnv() {
 	celoImage := os.Getenv("CELO_IMAGE")

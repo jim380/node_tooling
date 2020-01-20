@@ -20,18 +20,19 @@ package main
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 //  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 //  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-//  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+//  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN setup OF CONTRACT,
 //  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 //  ============================================================================
 
 import (
-	"log"
 	"flag"
+	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/node_tooling/Celo/action"
+	"github.com/node_tooling/Celo/cmd"
+	"github.com/node_tooling/Celo/setup"
 	"github.com/node_tooling/Celo/util"
 )
 
@@ -48,7 +49,7 @@ func main() {
 			log.Fatal("Error loading .env file")
 		}
 		util.SetEnv()
-		util.CmdAll()	
+		cmd.OptionsAll()
 	} else if !cmdInput {
 		//fmt.Println("Invalid flag value. flag.Args() is:", flag.Args())
 		err := godotenv.Load("config.env")
@@ -59,9 +60,9 @@ func main() {
 		message := "Which machine are you on:\n\n1) Local\n2) Validator\n3)" +
 			" " + "Proxy\n4) Attestation\n\nEnter down below (e.g. \"1\" or \"Local\"): "
 		machine = util.InputReader(message, machine)
-		action.NodeStop(machine)
-		action.KeyCheck(machine)
-		action.ChainDataDel(machine)
-		action.NodeRun(machine)
+		setup.NodeStop(machine)
+		setup.KeyCheck(machine)
+		setup.ChainDataDel(machine)
+		setup.NodeRun(machine)
 	}
 }

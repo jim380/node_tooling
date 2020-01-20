@@ -1,16 +1,17 @@
-package util
+package cmd
 
 import (
-	"fmt"
-	"os/exec"
-	"runtime"
 	"bufio"
+	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
-    "strconv"
+	"runtime"
+	"strconv"
 )
 
-func ExecuteCmd(cmd string) []byte{
+// ExecuteCmd is a wrapper for os.exec()
+func ExecuteCmd(cmd string) []byte {
 	// setEnv()
 	if runtime.GOOS == "windows" {
 		//cmd = exec.Command("tasklist")
@@ -44,11 +45,11 @@ func ExecuteCmd(cmd string) []byte{
 
 func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
 	// regexp.MustCompile("lockedGold: (\\d+)").FindStringSubmatch(string(output))
-	match :=  regexp.MustCompile(reg).FindStringSubmatch(string(output))
+	match := regexp.MustCompile(reg).FindStringSubmatch(string(output))
 	var result interface{}
 	if parseType == "int" {
 		// var result int
-		if (match != nil) {
+		if match != nil {
 			if i, err := strconv.Atoi(match[1]); err == nil {
 				result = i
 			}
@@ -56,7 +57,7 @@ func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
 		// fmt.Println("Test output: ", result)
 	} else if parseType == "float" {
 		// var result float64
-		if (match != nil) {
+		if match != nil {
 			if i, err := strconv.ParseFloat(match[1], 64); err == nil {
 				result = i
 			}
@@ -64,66 +65,6 @@ func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
 		// fmt.Println("Test output: ", result)
 	}
 	return result
-}
-
-func CmdAll() {
-	// input = InputReader(message, input)
-	var ifContinue = true
-	for ifContinue {
-		message := "\nWhat would you like?\n\n1) Election Show\n2) Account Balance\n" +
-		"3) Account Show\n4) Lockgold Show\n5) Validator Show\n6) Validator Status\n" + 
-		"7) Get Metadata\n" +
-		"\nEnter down below (e.g. \"1\"): "
-		fmt.Println(message)
-		fmt.Printf("=> ")
-		scanner := bufio.NewScanner(os.Stdin)
-  		for scanner.Scan() {
-  		  input := scanner.Text()
-			switch input {
-			case "1":
-				ExecuteCmd("celocli election:show $CELO_VALIDATOR_GROUP_ADDRESS --group")
-				ExecuteCmd("celocli election:show $CELO_VALIDATOR_GROUP_ADDRESS --voter")
-				ExecuteCmd("celocli election:show $CELO_VALIDATOR_ADDRESS --voter")
-			case "2":
-				// ExecuteCmd("celocli node:synced")
-				gold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				lockGold(gold, "gold")
-
-				usd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				amoutAvailable(usd, "usd")
-			case "3":
-				ExecuteCmd("celocli account:show $CELO_VALIDATOR_GROUP_ADDRESS")
-				ExecuteCmd("celocli account:show $CELO_VALIDATOR_ADDRESS")
-			case "4":
-				ExecuteCmd("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS")
-				ExecuteCmd("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS")
-			case "5":
-				ExecuteCmd("celocli validatorgroup:show $CELO_VALIDATOR_GROUP_ADDRESS")
-				ExecuteCmd("celocli validator:show $CELO_VALIDATOR_ADDRESS")
-			case "6":
-				ExecuteCmd("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS")
-			case "7":
-				ExecuteCmd("celocli account:get-metadata $CELO_VALIDATOR_ADDRESS")
-			}
-			break
-  		}
-		///////////////////
-		message1 := "\nWould you like to continue (y or n) => "
-		fmt.Printf(message1)
-		scanner1 := bufio.NewScanner(os.Stdin)
-  		for scanner1.Scan() {
-  		  	input := scanner1.Text()
-			if input == "n" || input == "N" {
-				return
-			} else if input == "y" || input == "Y" {
-				break
-			} else {
-				panic("invalid input")
-			}
-			break
-		}
-		ifContinue = true
-	}
 }
 
 func amoutAvailable(target []byte, asset string) interface{} {
@@ -143,29 +84,63 @@ func amoutAvailable(target []byte, asset string) interface{} {
 	return result
 }
 
-func lockGold(target []byte, asset string) {
-    amountGold := amoutAvailable(target, "gold")
-	message := "\nHow much would you like to lock?\n1) All\n2) A specific amount"
-	fmt.Printf(message)
-	fmt.Printf("\n=> ")
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		input := scanner.Text()
-		switch input {
+// CmdAll contains all actions can be performed
+// when the s-cmd flag is provided
+func OptionsAll() {
+	// input = InputReader(message, input)
+	var ifContinue = true
+	for ifContinue {
+		message := "\nWhat would you like?\n\n1) Election Show\n2) Account Balance\n" +
+			"3) Account Show\n4) Lockgold Show\n5) Validator Show\n6) Validator Status\n" +
+			"7) Get Metadata\n" +
+			"\nEnter down below (e.g. \"1\"): "
+		fmt.Println(message)
+		fmt.Printf("=> ")
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			input := scanner.Text()
+			switch input {
 			case "1":
-			fmt.Println("Locking all", amountGold, "gold")
-			// todo: lock all gold here
+				ExecuteCmd("celocli election:show $CELO_VALIDATOR_GROUP_ADDRESS --group")
+				ExecuteCmd("celocli election:show $CELO_VALIDATOR_GROUP_ADDRESS --voter")
+				ExecuteCmd("celocli election:show $CELO_VALIDATOR_ADDRESS --voter")
 			case "2":
-			fmt.Printf("\nHow much would you like to lock?")
-			fmt.Printf("\n=> ")
-			scanner := bufio.NewScanner(os.Stdin)
-			for scanner.Scan() {
-				input := scanner.Text()
-				fmt.Println("Locking", input, "gold")
-				// todo: lock $input amount of gold here
+				// ExecuteCmd("celocli node:synced")
+				gold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+				LockGold(gold, "gold")
+
+				usd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+				amoutAvailable(usd, "usd")
+			case "3":
+				ExecuteCmd("celocli account:show $CELO_VALIDATOR_GROUP_ADDRESS")
+				ExecuteCmd("celocli account:show $CELO_VALIDATOR_ADDRESS")
+			case "4":
+				ExecuteCmd("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS")
+				ExecuteCmd("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS")
+			case "5":
+				ExecuteCmd("celocli validatorgroup:show $CELO_VALIDATOR_GROUP_ADDRESS")
+				ExecuteCmd("celocli validator:show $CELO_VALIDATOR_ADDRESS")
+			case "6":
+				ExecuteCmd("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS")
+			case "7":
+				ExecuteCmd("celocli account:get-metadata $CELO_VALIDATOR_ADDRESS")
+			}
+			break
+		}
+		///////////////////
+		message1 := "\nWould you like to continue (y or n) => "
+		fmt.Printf(message1)
+		scanner1 := bufio.NewScanner(os.Stdin)
+		for scanner1.Scan() {
+			input := scanner1.Text()
+			if input == "n" || input == "N" {
+				return
+			} else if input == "y" || input == "Y" {
 				break
+			} else {
+				panic("invalid input")
 			}
 		}
-		break
+		ifContinue = true
 	}
 }

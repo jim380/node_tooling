@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// InputReader reads the input provided on the first prompt
 func InputReader(msg string, target string) string {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Printf(msg)
@@ -34,4 +35,3 @@ func InputReader(msg string, target string) string {
 	}
 	return target
 }
-
