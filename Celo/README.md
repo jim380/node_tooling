@@ -1,4 +1,4 @@
-# Celo Command Line Tool
+# Celo Cli Wrapper
 
 #### General Setup
 1. `$ git clone https://github.com/jim380/node_tooling` into your `$GOPATH/src/github.com`

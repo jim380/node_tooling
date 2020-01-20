@@ -106,14 +106,14 @@ func OptionsAll() {
 				ExecuteCmd("celocli election:show $CELO_VALIDATOR_ADDRESS --voter")
 			case "2":
 				valGrGold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				lockGold(valGrGold, "gold")
+				lockGold(valGrGold, "gold", "group")
 				valGold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
-				lockGold(valGold, "gold")
+				lockGold(valGold, "gold", "validator")
 
 				valGrUsd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				amoutAvailable(valGrUsd, "usd")
+				UsdToGold(valGrUsd, "usd", "group")
 				valUsd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
-				amoutAvailable(valUsd, "usd")
+				UsdToGold(valUsd, "usd", "validator")
 			case "3":
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_GROUP_ADDRESS")
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_ADDRESS")
@@ -128,7 +128,9 @@ func OptionsAll() {
 			case "7":
 				ExecuteCmd("celocli account:get-metadata $CELO_VALIDATOR_ADDRESS")
 			case "8":
-			ExecuteCmd("celocli node:synced")
+				ExecuteCmd("celocli node:synced")
+			default:
+				panic("invalid input")
 			}
 			break
 		}
