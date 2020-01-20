@@ -6,9 +6,11 @@ import (
 	"runtime"
 	"bufio"
 	"os"
+	"regexp"
+    "strconv"
 )
 
-func ExecuteCmd(cmd string) {
+func ExecuteCmd(cmd string) []byte{
 	// setEnv()
 	if runtime.GOOS == "windows" {
 		//cmd = exec.Command("tasklist")
@@ -37,6 +39,31 @@ func ExecuteCmd(cmd string) {
 		fmt.Println("\n\u2713\u2713\u2713\u2713\u2713\u2713Ran successfully\u2713\u2713\u2713\u2713\u2713\u2713")
 		fmt.Println("-----")
 	}
+	return output
+}
+
+func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
+	// regexp.MustCompile("lockedGold: (\\d+)").FindStringSubmatch(string(output))
+	match :=  regexp.MustCompile(reg).FindStringSubmatch(string(output))
+	var result interface{}
+	if parseType == "int" {
+		// var result int
+		if (match != nil) {
+			if i, err := strconv.Atoi(match[1]); err == nil {
+				result = i
+			}
+		}
+		// fmt.Println("Test output: ", result)
+	} else if parseType == "float" {
+		// var result float64
+		if (match != nil) {
+			if i, err := strconv.ParseFloat(match[1], 64); err == nil {
+				result = i
+			}
+		}
+		// fmt.Println("Test output: ", result)
+	}
+	return result
 }
 
 func CmdAll() {
@@ -59,8 +86,11 @@ func CmdAll() {
 				ExecuteCmd("celocli election:show $CELO_VALIDATOR_ADDRESS --voter")
 			case "2":
 				// ExecuteCmd("celocli node:synced")
-				ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
+				gold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+				lockGold(gold, "gold")
+
+				usd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+				amoutAvailable(usd, "usd")
 			case "3":
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_GROUP_ADDRESS")
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_ADDRESS")
@@ -93,5 +123,49 @@ func CmdAll() {
 			break
 		}
 		ifContinue = true
+	}
+}
+
+func amoutAvailable(target []byte, asset string) interface{} {
+	// gold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+	var result interface{}
+	switch asset {
+	case "gold":
+		result = parseCmdOutput(target, "int", "gold: (\\d+)")
+		fmt.Printf("\nYou have %v gold available to lock\n", result)
+	case "lockedGold":
+		result = parseCmdOutput(target, "float", "lockedGold: (\\d+\\.\\d+e+\\+22)")
+		fmt.Printf("\nYou have %v lockedGold\n", result)
+	case "usd":
+		result = parseCmdOutput(target, "int", "usd: (\\d+)")
+		fmt.Printf("\nYou have %v usd available to exchange\n", result)
+	}
+	return result
+}
+
+func lockGold(target []byte, asset string) {
+    amountGold := amoutAvailable(target, "gold")
+	message := "\nHow much would you like to lock?\n1) All\n2) A specific amount"
+	fmt.Printf(message)
+	fmt.Printf("\n=> ")
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		input := scanner.Text()
+		switch input {
+			case "1":
+			fmt.Println("Locking all", amountGold, "gold")
+			// todo: lock all gold here
+			case "2":
+			fmt.Printf("\nHow much would you like to lock?")
+			fmt.Printf("\n=> ")
+			scanner := bufio.NewScanner(os.Stdin)
+			for scanner.Scan() {
+				input := scanner.Text()
+				fmt.Println("Locking", input, "gold")
+				// todo: lock $input amount of gold here
+				break
+			}
+		}
+		break
 	}
 }
