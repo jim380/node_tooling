@@ -54,9 +54,9 @@ func UsdToGoldAmount(amount string, role string) {
 	//toExchange, _ := strconv.Atoi(amount)
     if role == "group" {
         fmt.Println("Exchanging", amount, "usd from validator group")
-	    ExecuteCmd("ccelocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount)
+	    ExecuteCmd("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount)
     } else if role == "validator" {
         fmt.Println("Exchanging", amount, "usd from validator")
-	    ExecuteCmd("ccelocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value " + amount)
+	    ExecuteCmd("celocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value " + amount)
     }
 }

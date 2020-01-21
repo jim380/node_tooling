@@ -27,8 +27,8 @@ func lockGold(target []byte, asset string, role string) {
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				toLock := scanner.Text()
-				toLockValue, _ := strconv.Atoi(toLock)
-				amountGoldValue := amountGold.(int)
+				toLockValue, _ := strconv.ParseFloat(toLock, 64)
+				amountGoldValue := amountGold.(float64)
 				if toLockValue < amountGoldValue {
 					fmt.Println("\nLocking", toLock, "gold has been requested.")
 					lockGoldAmount(toLock, role)
