@@ -34,13 +34,16 @@ import (
 	"github.com/node_tooling/Celo/cmd"
 	"github.com/node_tooling/Celo/setup"
 	"github.com/node_tooling/Celo/util"
+	"github.com/node_tooling/Celo/bot"
 )
 
 func main() {
 	var machine string
 	var cmdInput bool
+	var teleBot bool
 
 	flag.BoolVar(&cmdInput, "cmd", false, "Show election details")
+	flag.BoolVar(&teleBot, "bot", false, "Run the telegram bot")
 	flag.Parse()
 
 	if cmdInput {
@@ -50,6 +53,13 @@ func main() {
 		}
 		util.SetEnv()
 		cmd.OptionsAll()
+	} else if teleBot {
+		err := godotenv.Load("config.env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		util.SetEnv()
+		bot.BotRun()
 	} else if !cmdInput {
 		//fmt.Println("Invalid flag value. flag.Args() is:", flag.Args())
 		err := godotenv.Load("config.env")

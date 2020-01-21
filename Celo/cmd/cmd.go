@@ -67,7 +67,7 @@ func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
 	return result
 }
 
-func amoutAvailable(target []byte, asset string) interface{} {
+func AmountAvailable(target []byte, asset string) interface{} {
 	// gold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
 	var result interface{}
 	switch asset {
