@@ -17,7 +17,7 @@ func UsdToGold(target []byte, asset string, role string) {
 		input := scanner.Text()
 		switch input {
 		case "1":
-            amountUsdValue := amountUsd.(int)
+            amountUsdValue := amountUsd.(float64)
             if amountUsdValue > 0 {
                 fmt.Println("\nExchange of", amountUsd, "usd has been requested.")
 			    toExchange := fmt.Sprintf("%v", amountUsd)
@@ -32,8 +32,8 @@ func UsdToGold(target []byte, asset string, role string) {
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				toExchange := scanner.Text()
-				toExchangeValue, _ := strconv.Atoi(toExchange)
-				amountUsdValue := amountUsd.(int)
+				toExchangeValue, _ := strconv.ParseFloat(toExchange, 64)
+				amountUsdValue := amountUsd.(float64)
 				if toExchangeValue < amountUsdValue {
 					fmt.Println("\nExchange of", toExchange, "usd has been requested.")
 					UsdToGoldAmount(toExchange, role)

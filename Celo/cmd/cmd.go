@@ -78,7 +78,7 @@ func AmountAvailable(target []byte, asset string) interface{} {
 		result = parseCmdOutput(target, "float", "lockedGold: (\\d+\\.\\d+e+\\+22)")
 		fmt.Printf("\nYou have %v lockedGold\n", result)
 	case "usd":
-		result = parseCmdOutput(target, "int", "usd: (\\d+)")
+		result = parseCmdOutput(target, "float", "usd: (\\d+)")
 		fmt.Printf("\nYou have %v usd available to exchange\n", result)
 	}
 	return result
