@@ -43,14 +43,14 @@ func ExecuteCmd(cmd string) []byte {
 	return output
 }
 
-func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
+func ParseCmdOutput(output []byte, parseType string, reg string, matchGr int) interface{} {
 	// regexp.MustCompile("lockedGold: (\\d+)").FindStringSubmatch(string(output))
 	match := regexp.MustCompile(reg).FindStringSubmatch(string(output))
 	var result interface{}
 	if parseType == "int" {
 		// var result int
 		if match != nil {
-			if i, err := strconv.Atoi(match[1]); err == nil {
+			if i, err := strconv.Atoi(match[matchGr]); err == nil {
 				result = i
 			}
 		}
@@ -58,9 +58,19 @@ func parseCmdOutput(output []byte, parseType string, reg string) interface{} {
 	} else if parseType == "float" {
 		// var result float64
 		if match != nil {
-			if i, err := strconv.ParseFloat(match[1], 64); err == nil {
+			if i, err := strconv.ParseFloat(match[matchGr], 64); err == nil {
 				result = i
 			}
+		}
+		// fmt.Println("Test output: ", result)
+	} else if parseType == "string" {
+		// var result float64
+		if match != nil {
+			// if i, err := string(match[1]); err == nil {
+			// 	result = i
+			// }
+			result = match[matchGr]
+
 		}
 		// fmt.Println("Test output: ", result)
 	}
@@ -72,13 +82,13 @@ func AmountAvailable(target []byte, asset string) interface{} {
 	var result interface{}
 	switch asset {
 	case "gold":
-		result = parseCmdOutput(target, "float", "gold: (\\d+)")
+		result = ParseCmdOutput(target, "float", "gold: (\\d+)", 1)
 		fmt.Printf("\nYou have %v gold available to lock\n", result)
 	case "lockedGold":
-		result = parseCmdOutput(target, "float", "lockedGold: (\\d+\\.\\d+e+\\+22)")
+		result = ParseCmdOutput(target, "float", "lockedGold: (\\d+\\.\\d+e+\\+22)", 1)
 		fmt.Printf("\nYou have %v lockedGold\n", result)
 	case "usd":
-		result = parseCmdOutput(target, "float", "usd: (\\d+)")
+		result = ParseCmdOutput(target, "float", "usd: (\\d+)", 1)
 		fmt.Printf("\nYou have %v usd available to exchange\n", result)
 	}
 	return result
@@ -106,14 +116,14 @@ func OptionsAll() {
 				ExecuteCmd("celocli election:show $CELO_VALIDATOR_ADDRESS --voter")
 			case "2":
 				valGrGold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				lockGold(valGrGold, "gold", "group")
+				lockGold(valGrGold, "group")
 				valGold := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
-				lockGold(valGold, "gold", "validator")
+				lockGold(valGold, "validator")
 
 				valGrUsd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
-				UsdToGold(valGrUsd, "usd", "group")
+				UsdToGold(valGrUsd, "group")
 				valUsd := ExecuteCmd("celocli account:balance $CELO_VALIDATOR_ADDRESS")
-				UsdToGold(valUsd, "usd", "validator")
+				UsdToGold(valUsd, "validator")
 			case "3":
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_GROUP_ADDRESS")
 				ExecuteCmd("celocli account:show $CELO_VALIDATOR_ADDRESS")

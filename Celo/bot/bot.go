@@ -6,21 +6,35 @@ import (
     "os/exec"
     "fmt"
     "runtime"
+	"strings"
     "github.com/node_tooling/Celo/cmd"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-var numericKeyboard = tgbotapi.NewReplyKeyboard(
+var mainKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("/balance"),
 		tgbotapi.NewKeyboardButton("/synced"),
 		tgbotapi.NewKeyboardButton("/status"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("/empty"),
+		tgbotapi.NewKeyboardButton("/score"),
 		tgbotapi.NewKeyboardButton("/empty"),
 		tgbotapi.NewKeyboardButton("/close"),
 	),
+)
+
+var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("all", "all"),
+		tgbotapi.NewInlineKeyboardButtonData("specific amount", "lock a specific amount"),
+		tgbotapi.NewInlineKeyboardButtonData("back", "go back to main menu"),
+	),
+	// tgbotapi.NewKeyboardButtonRow(
+	// 	tgbotapi.NewKeyboardButton("/lockgold"),
+	// 	tgbotapi.NewKeyboardButton("/empty"),
+	// 	tgbotapi.NewKeyboardButton("/close"),
+	// ),
 )
 
 type Balance struct {
@@ -63,6 +77,7 @@ func BotRun() {
 		// log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		msg.ParseMode = "Markdown"
 		// msg.ReplyToMessageID = update.Message.MessageID
 		// bot.Send(msg)
         
@@ -73,7 +88,7 @@ func BotRun() {
 			msg.Text = "I'm ok."
         case "open":
 			msg.Text = "What would you like to query?"
-            msg.ReplyMarkup = numericKeyboard
+            msg.ReplyMarkup = mainKeyboard
         case "close":
             msg.Text = "keyboard closed. Type /open to reopen"
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
@@ -85,12 +100,40 @@ func BotRun() {
             valB := botGetValBalance(valBalance)
             valGrBalance := botExecCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
             valGrB := botGetValBalance(valGrBalance)
-            msgPiece1 := "gold: " + valB.balance.gold + "\n" + "usd: " + valB.balance.usd + "\n"
-            msgPiece2 := "gold: " + valGrB.balance.gold + "\n" + "usd: " + valGrB.balance.usd + "\n"
-            msg.Text = "Validator Group\n" + msgPiece1 + "-------\n" + "Validator\n" + msgPiece2
+			msgPiece1 := `*gold*: ` + valGrB.balance.gold + "\n" + `*usd*: ` + valGrB.balance.usd + "\n"
+            msgPiece2 := `*gold*: ` + valB.balance.gold + "\n" + `*usd*: ` + valB.balance.usd + "\n"
+            msg.Text = "Validator Group\n" + msgPiece1 + "--------------\n" + "Validator\n" + msgPiece2
 		case "status":
             command := botExecCmd("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS")
-			msg.Text = string(command)
+			words := cmd.ParseCmdOutput(command, "string", "(true|false)\\s*(true|false)\\s*(\\d*)\\s*(\\d*.)", 0)
+			wordsSplit := strings.Fields(fmt.Sprintf("%v", words))
+			ifElected := wordsSplit[0] + "\n"
+			ifFrontRunner := wordsSplit[1] + "\n"
+			numProposed := wordsSplit[2] + "\n"
+			perctSigned := wordsSplit[3] + "\n"
+			message := `*Elected*: ` + ifElected + `*Frontrunner*: ` + ifFrontRunner + `*Proposed*: ` + numProposed + `*Signatures*: ` + perctSigned
+			msg.Text =  message
+		case "score":
+			command := botExecCmd("celocli validator:show $CELO_VALIDATOR_ADDRESS")
+			words := cmd.ParseCmdOutput(command, "string", "score: (\\d.\\d*)", 1)
+			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
+		case "lockgold":
+			command := botExecCmd("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS")
+			amountGold := cmd.AmountAvailable(command, "gold")
+			msgPiece1 := "You have " + fmt.Sprintf("%v", amountGold) + " gold available.\n"
+			msgPiece2 := "How much would you like to lock?\n"
+			msg.Text = msgPiece1 + msgPiece2
+			msg.ReplyMarkup = lockGoldKeyboard
+			// if update.CallbackQuery != nil {
+			// 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+    		// 	// msg.ReplyToMessageID = update.Message.MessageID
+			// 	msg.Text = "Locking all gold"
+			// 	bot.Send(msg)
+			// }
+		case "all":
+			msg.Text = "Locking all gold"
+		case "specific_amount":
+			msg.Text = "Locking a specific amount of gold"
 		default:
 			msg.Text = "Command not yet supported"
 		}

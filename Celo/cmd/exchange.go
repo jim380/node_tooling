@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-func UsdToGold(target []byte, asset string, role string) {
+func UsdToGold(target []byte, role string) {
     amountUsd := AmountAvailable(target, "usd")
-    message := "\nHow much would you like to exchange?\n1) All\n2) A specific amount"
+    message := "\nHow much would you like to exchange?\n1) All\n2) A specific amount\n3) Move on"
 	fmt.Printf(message)
 	fmt.Printf("\n=> ")
 	scanner := bufio.NewScanner(os.Stdin)
@@ -43,6 +43,8 @@ func UsdToGold(target []byte, asset string, role string) {
 				}
 				break
 			}
+		case "3":
+			return
         default:
 			panic("invalid input")
 		}
