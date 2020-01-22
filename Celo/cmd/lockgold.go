@@ -29,7 +29,7 @@ func lockGold(target []byte, role string) {
 				toLock := scanner.Text()
 				toLockValue, _ := strconv.ParseFloat(toLock, 64)
 				amountGoldValue := amountGold.(float64)
-				if toLockValue < amountGoldValue {
+				if toLockValue <= amountGoldValue {
 					fmt.Println("\nLocking", toLock, "gold has been requested.")
 					lockGoldAmount(toLock, role)
 				} else {
@@ -55,10 +55,10 @@ func lockGoldAmount(amount string, role string) {
 		fmt.Println("\n==> Not enough gold to set aside 1 gold for fees." + " Must have at least 1 gold reserved.")
 	} else {
 		if role == "group" {
-			fmt.Println("Locking", toLock, "gold from validator group")
+			fmt.Println("\nLocking", toLock, "gold from validator group")
 			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + fmt.Sprintf("%f", toLock))
 		} else if role == "validator" {
-			fmt.Println("Locking", toLock, "gold from validator")
+			fmt.Println("\nLocking", toLock, "gold from validator")
 			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + fmt.Sprintf("%f", toLock))
 		}
 		// ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value 10000000000000000000000")

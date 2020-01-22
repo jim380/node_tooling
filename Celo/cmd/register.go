@@ -4,7 +4,9 @@ import (
 	"fmt"
 )
 
-// Register performs the actions of registering a validator
+// Register is currently just a placeholder
+// for all neccessary commands during validator
+// registration
 func Register(target string) {
 	if target == "local" {
 		fmt.Printf("\nChecking balance on %s machine", target)

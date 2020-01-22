@@ -34,7 +34,7 @@ func UsdToGold(target []byte, role string) {
 				toExchange := scanner.Text()
 				toExchangeValue, _ := strconv.ParseFloat(toExchange, 64)
 				amountUsdValue := amountUsd.(float64)
-				if toExchangeValue < amountUsdValue {
+				if toExchangeValue <= amountUsdValue {
 					fmt.Println("\nExchange of", toExchange, "usd has been requested.")
 					UsdToGoldAmount(toExchange, role)
 				} else {
@@ -55,10 +55,10 @@ func UsdToGold(target []byte, role string) {
 func UsdToGoldAmount(amount string, role string) {
 	//toExchange, _ := strconv.Atoi(amount)
     if role == "group" {
-        fmt.Println("Exchanging", amount, "usd from validator group")
+        fmt.Println("\nExchanging", amount, "usd from validator group")
 	    ExecuteCmd("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount)
     } else if role == "validator" {
-        fmt.Println("Exchanging", amount, "usd from validator")
+        fmt.Println("\nExchanging", amount, "usd from validator")
 	    ExecuteCmd("celocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value " + amount)
     }
 }
