@@ -48,7 +48,7 @@ func lockGold(target []byte, role string) {
 }
 
 func lockGoldAmount(amount string, role string) {
-	toLock, _ := strconv.Atoi(amount)
+	toLock, _ := strconv.ParseFloat(amount, 64)
 	toLock = toLock - 1000000000000000000
 	if toLock <= 0 {
 		// fmt.Printf("%v is of the type %T", toLockAfter, toLockAfter)
@@ -56,10 +56,10 @@ func lockGoldAmount(amount string, role string) {
 	} else {
 		if role == "group" {
 			fmt.Println("Locking", toLock, "gold from validator group")
-			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + strconv.Itoa(toLock))
+			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + fmt.Sprintf("%f", toLock))
 		} else if role == "validator" {
 			fmt.Println("Locking", toLock, "gold from validator")
-			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + strconv.Itoa(toLock))
+			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + fmt.Sprintf("%f", toLock))
 		}
 		// ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value 10000000000000000000000")
 	}

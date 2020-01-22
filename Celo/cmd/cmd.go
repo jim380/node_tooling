@@ -82,13 +82,13 @@ func AmountAvailable(target []byte, asset string) interface{} {
 	var result interface{}
 	switch asset {
 	case "gold":
-		result = ParseCmdOutput(target, "float", "gold: (\\d+)", 1)
+		result = ParseCmdOutput(target, "float", "gold: (\\d.\\d*.+)", 1)
 		fmt.Printf("\nYou have %v gold available to lock\n", result)
 	case "lockedGold":
-		result = ParseCmdOutput(target, "float", "lockedGold: (\\d+\\.\\d+e+\\+22)", 1)
+		result = ParseCmdOutput(target, "float", "lockedGold: (\\d.\\d*.+)", 1)
 		fmt.Printf("\nYou have %v lockedGold\n", result)
 	case "usd":
-		result = ParseCmdOutput(target, "float", "usd: (\\d+)", 1)
+		result = ParseCmdOutput(target, "float", "usd: (\\d.\\d*.+)", 1)
 		fmt.Printf("\nYou have %v usd available to exchange\n", result)
 	}
 	return result
