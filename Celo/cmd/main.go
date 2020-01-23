@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// CmdAll contains all actions can be performed
+// OptionsAll contains all actions can be performed
 // when the s-cmd flag is provided
 func OptionsAll() {
 	// input = InputReader(message, input)
