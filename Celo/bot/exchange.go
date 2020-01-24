@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
     "log"
+    "strconv"
     "github.com/node_tooling/Celo/cmd"
     tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -71,4 +72,27 @@ func usdToGoldAmount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount st
 		msg.Text = errText(fmt.Sprintf("%v", outputParsed))
     }
     return msg.Text
+}
+
+func getExchangeRate(msg tgbotapi.MessageConfig) string {
+    output,_ := botExecCmdOut("celocli exchange:show", msg)
+    // msg.Text = string(output)
+    // if _, err := bot.Send(msg); err != nil {
+	// 	log.Panic(err)
+	// }
+	cGold := cmd.ParseCmdOutput(output, "string", "(\\d.*) cGLD =>", 1)
+    cUsd := cmd.ParseCmdOutput(output, "string", "=> (\\d.*) cUSD", 1)
+    cGoldFloat,_ := strconv.ParseFloat(fmt.Sprintf("%v", cGold), 64)
+    cUsdFloat,_ := strconv.ParseFloat(fmt.Sprintf("%v", cUsd), 64)
+    goldToUsdRatio := cUsdFloat / cGoldFloat
+
+    cUsd2 := cmd.ParseCmdOutput(output, "string", "(\\d.*) cUSD =>", 1)
+    cGold2 := cmd.ParseCmdOutput(output, "string", "=> (\\d.*) cGLD", 1)
+    cUsd2Float,_ := strconv.ParseFloat(fmt.Sprintf("%v", cUsd2), 64)
+    cGold2Float,_ := strconv.ParseFloat(fmt.Sprintf("%v", cGold2), 64)
+    usdToGoldRatio := cGold2Float / cUsd2Float
+    msgPiece1 := "1 cGLD = " + fmt.Sprintf("%f", goldToUsdRatio) + " cUSD\n" 
+    msgPiece2 := "1 cUSD = " + fmt.Sprintf("%f", usdToGoldRatio) + " cGLD"
+    msgPiece3 := boldText("\n\nResults are truncated")
+    return msgPiece1 + msgPiece2 + msgPiece3
 }

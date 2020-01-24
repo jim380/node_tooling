@@ -23,7 +23,7 @@ var mainKeyboard = tgbotapi.NewReplyKeyboard(
 	),
 		tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("/exchange"),
-		tgbotapi.NewKeyboardButton("/empty"),
+		tgbotapi.NewKeyboardButton("/exchange_rate"),
 		tgbotapi.NewKeyboardButton("/close"),
 	),
 )
@@ -188,6 +188,8 @@ func BotRun() {
 			case "signing":
 				_,output := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
 				msg.Text = output
+			case "exchange_rate":
+				msg.Text = getExchangeRate(msg)
 			default:
 				msg.Text = "Command not yet supported"
 		}
