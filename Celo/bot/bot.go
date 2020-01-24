@@ -166,18 +166,24 @@ func BotRun() {
 				words := cmd.ParseCmdOutput(command, "string", "score: (\\d.\\d*)", 1)
 				msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
 			case "lockgold":
-				command,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-				amountGold := cmd.AmountAvailable(command, "gold")
-				msgPiece1 := "You have " + fmt.Sprintf("%v", amountGold) + " gold available.\n"
-				msgPiece2 := "How much would you like to lock?\n"
-				msg.Text = msgPiece1 + msgPiece2
+				commandValGr,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+				commandVal,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+				amountGoldValGr := cmd.AmountAvailable(commandValGr, "gold")
+				amountGoldVal := cmd.AmountAvailable(commandVal, "gold")
+				msgPiece1 := boldText("Gold Available\n") + "Validator Group: " + fmt.Sprintf("%v", amountGoldValGr) + "\n"
+				msgPiece2 := "Validator: " + fmt.Sprintf("%v", amountGoldVal) + "\n"
+				msgPiece3 := "\nHow much would you like to lock?"
+				msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 				msg.ReplyMarkup = lockGoldKeyboard
 			case "exchange":
-				command,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-				amountUsd := cmd.AmountAvailable(command, "usd")
-				msgPiece1 := "You have " + fmt.Sprintf("%v", amountUsd) + " usd available.\n"
-				msgPiece2 := "How much would you like to lock?\n"
-				msg.Text = msgPiece1 + msgPiece2
+				commandValGr,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+				commandVal,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+				amountUsdValGr := cmd.AmountAvailable(commandValGr, "usd")
+				amountUsdVal := cmd.AmountAvailable(commandVal, "usd")
+				msgPiece1 := boldText("USD Available\n") + "Validator Group: " + fmt.Sprintf("%v", amountUsdValGr) + "\n"
+				msgPiece2 := "Validator: " + fmt.Sprintf("%v", amountUsdVal) + "\n"
+				msgPiece3 := "How much would you like to exchange?\n"
+				msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 				msg.ReplyMarkup = exchangeUsdKeyboard
 			case "signing":
 				_,output := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
