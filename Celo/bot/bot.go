@@ -22,9 +22,9 @@ var mainKeyboard = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButton("/signing"),
 	),
 		tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("/exchange"),
+		tgbotapi.NewKeyboardButton("/empty"),
 		tgbotapi.NewKeyboardButton("/close"),
-		// tgbotapi.NewKeyboardButton("/lockgold"),
-		// tgbotapi.NewKeyboardButton("/signing"),
 	),
 )
 
@@ -32,6 +32,17 @@ var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAll"),
 		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAll"),
+	),
+	// tgbotapi.NewInlineKeyboardRow(
+	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
+	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Group Amount", "valGrAmount"),
+	// ),
+)
+
+var exchangeUsdKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAllUsd"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAllUsd"),
 	),
 	// tgbotapi.NewInlineKeyboardRow(
 	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
@@ -96,6 +107,12 @@ func BotRun() {
 				case "valGrAmount":
 					msg.Text = "Locking a specific amount from validator group was requested"
 					break
+				case "valGrAllUsd":
+					msg.Text = allExchangeUsd(bot, msg, "group")
+					break
+				case "valAllUsd":
+					msg.Text = allExchangeUsd(bot, msg, "validator")
+					break
 				case "cancel": 
 					msg.Text = "Back to back menu"
 				break
@@ -155,6 +172,13 @@ func BotRun() {
 				msgPiece2 := "How much would you like to lock?\n"
 				msg.Text = msgPiece1 + msgPiece2
 				msg.ReplyMarkup = lockGoldKeyboard
+			case "exchange":
+				command,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+				amountUsd := cmd.AmountAvailable(command, "usd")
+				msgPiece1 := "You have " + fmt.Sprintf("%v", amountUsd) + " usd available.\n"
+				msgPiece2 := "How much would you like to lock?\n"
+				msg.Text = msgPiece1 + msgPiece2
+				msg.ReplyMarkup = exchangeUsdKeyboard
 			case "signing":
 				_,output := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
 				msg.Text = output
