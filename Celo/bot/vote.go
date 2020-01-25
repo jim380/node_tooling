@@ -14,19 +14,19 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		log.Panic(err)
 	}
     if role == "group" {
-        nonvotingGold, voteOutput := botExecCmdOut("celocli lockedgold:show --from $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-        msg.Text = voteOutput
-        if _, err := bot.Send(msg); err != nil {
-            log.Panic(err)
-        }
+        nonvotingGold, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+        // msg.Text = voteOutput
+        // if _, err := bot.Send(msg); err != nil {
+        //     log.Panic(err)
+        // }
         output := allVoteValidate(bot, msg, nonvotingGold, role)
         msg.Text = output
     } else if role == "validator" {
-        nonvotingGold, voteOutput := botExecCmdOut("celocli lockedgold:show --from $CELO_VALIDATOR_ADDRESS", msg)
-        msg.Text = voteOutput
-        if _, err := bot.Send(msg); err != nil {
-            log.Panic(err)
-        }
+        nonvotingGold, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
+        // msg.Text = voteOutput
+        // if _, err := bot.Send(msg); err != nil {
+        //     log.Panic(err)
+        // }
         output := allVoteValidate(bot, msg, nonvotingGold, role)
         msg.Text = output
     }    
@@ -53,17 +53,22 @@ func allVoteExecution(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount s
         if _, err := bot.Send(msg); err != nil {
 	        log.Panic(err)
 	    }
-        output,_ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount, msg)
-		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
-		msg.Text = errText(fmt.Sprintf("%v", outputParsed))
+        // --- Display parsed success/fail output --- //
+        // output,_ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount, msg)
+		// outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
+		// msg.Text = errText(fmt.Sprintf("%v", outputParsed))
+
+        _,output := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount, msg)
+		// outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
+		msg.Text = output
     } else if role == "validator" {
         msg.Text = boldText("Casting " + amount + " votes from validator")
         if _, err := bot.Send(msg); err != nil {
 	        log.Panic(err)
 	    }
-        output,_ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount, msg)
-		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
-		msg.Text = errText(fmt.Sprintf("%v", outputParsed))
+        _,output := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + amount, msg)
+		// outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
+		msg.Text = output
     }
     return msg.Text
 }

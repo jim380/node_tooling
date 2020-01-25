@@ -11,3 +11,7 @@ func warnText(str string) string {
 func errText(str string) string {
     return "\xE2\x9D\x8C " + str
 }
+
+func successText(str string) string {
+    return "\xE2\x9C\x94 " + str
+}
