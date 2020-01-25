@@ -12,26 +12,31 @@ import (
 
 var mainKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("/balance"),
 		tgbotapi.NewKeyboardButton("/synced"),
+		tgbotapi.NewKeyboardButton("/balance"),
 		tgbotapi.NewKeyboardButton("/status"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("/score"),
-		tgbotapi.NewKeyboardButton("/lockgold"),
 		tgbotapi.NewKeyboardButton("/signing"),
+		tgbotapi.NewKeyboardButton("/exchange_rate"),
 	),
 		tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("/lockgold"),
 		tgbotapi.NewKeyboardButton("/exchange"),
-		tgbotapi.NewKeyboardButton("/exchange_rate"),
+		tgbotapi.NewKeyboardButton("/vote"),
+	),
+		tgbotapi.NewKeyboardButtonRow(
+		// tgbotapi.NewKeyboardButton("/exchange"),
+		// tgbotapi.NewKeyboardButton("/exchange_rate"),
 		tgbotapi.NewKeyboardButton("/close"),
 	),
 )
 
 var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAll"),
 		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAll"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAll"),
 	),
 	// tgbotapi.NewInlineKeyboardRow(
 	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
@@ -41,13 +46,16 @@ var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 
 var exchangeUsdKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAllUsd"),
 		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAllUsd"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAllUsd"),
 	),
-	// tgbotapi.NewInlineKeyboardRow(
-	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
-	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Group Amount", "valGrAmount"),
-	// ),
+)
+
+var electionVoteKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAllVote"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAllVote"),
+	),
 )
 
 type Balance struct {
@@ -112,6 +120,12 @@ func BotRun() {
 					break
 				case "valAllUsd":
 					msg.Text = allExchangeUsd(bot, msg, "validator")
+					break
+				case "valGrAllVote":
+					msg.Text = allVote(bot, msg, "group")
+					break
+				case "valAllVote":
+					msg.Text = allVote(bot, msg, "validator")
 					break
 				case "cancel": 
 					msg.Text = "Back to back menu"
@@ -185,6 +199,20 @@ func BotRun() {
 				msgPiece3 := "How much would you like to exchange?\n"
 				msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 				msg.ReplyMarkup = exchangeUsdKeyboard
+			case "vote":
+				commandValGr,_ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+				commandVal,_ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
+				amountNonvotingGoldValGr := cmd.AmountAvailable(commandValGr, "nonvotingLockedGold")
+				amountNonvotingGoldVal := cmd.AmountAvailable(commandVal, "nonvotingLockedGold")
+				if amountNonvotingGoldValGr == nil && amountNonvotingGoldVal == nil{
+					msg.Text = "You have no non-voting lockedGold available"
+				} else {
+					msgPiece1 := boldText("Non-voting Locked Gold Available\n") + "Validator Group: " + fmt.Sprintf("%v", amountNonvotingGoldValGr) + "\n"
+					msgPiece2 := "Validator: " + fmt.Sprintf("%v", amountNonvotingGoldVal) + "\n"
+					msgPiece3 := "How much would you like to cast?\n"
+					msg.Text = msgPiece1 + msgPiece2 + msgPiece3
+					msg.ReplyMarkup = electionVoteKeyboard	
+				}
 			case "signing":
 				_,output := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
 				msg.Text = output
