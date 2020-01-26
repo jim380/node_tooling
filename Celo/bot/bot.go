@@ -196,7 +196,7 @@ func BotRun() {
 				amountUsdVal := cmd.AmountAvailable(commandVal, "usd")
 				msgPiece1 := boldText("USD Available\n") + "Validator Group: " + fmt.Sprintf("%v", amountUsdValGr) + "\n"
 				msgPiece2 := "Validator: " + fmt.Sprintf("%v", amountUsdVal) + "\n"
-				msgPiece3 := "How much would you like to exchange?\n"
+				msgPiece3 := "\nHow much would you like to exchange?\n"
 				msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 				msg.ReplyMarkup = exchangeUsdKeyboard
 			case "vote":
@@ -209,7 +209,7 @@ func BotRun() {
 				} else {
 					msgPiece1 := boldText("Non-voting Locked Gold Available\n") + "Validator Group: " + fmt.Sprintf("%v", amountNonvotingGoldValGr) + "\n"
 					msgPiece2 := "Validator: " + fmt.Sprintf("%v", amountNonvotingGoldVal) + "\n"
-					msgPiece3 := "How much would you like to cast?\n"
+					msgPiece3 := "\nHow much would you like to cast?\n"
 					msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 					msg.ReplyMarkup = electionVoteKeyboard	
 				}

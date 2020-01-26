@@ -4,7 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
+	// "strconv"
+	"github.com/shopspring/decimal"
 )
 
 func UsdToGold(target []byte, role string) {
@@ -17,8 +18,9 @@ func UsdToGold(target []byte, role string) {
 		input := scanner.Text()
 		switch input {
 		case "1":
-            amountUsdValue := amountUsd.(float64)
-            if amountUsdValue > 0 {
+            amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
+            zeroValue, _ := decimal.NewFromString("0")
+			if amountUsdValue.Cmp(zeroValue) == 1 {
                 fmt.Println("\nExchange of", amountUsd, "usd has been requested.")
 			    toExchange := fmt.Sprintf("%v", amountUsd)
 			    UsdToGoldAmount(toExchange, role)
@@ -32,9 +34,9 @@ func UsdToGold(target []byte, role string) {
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				toExchange := scanner.Text()
-				toExchangeValue, _ := strconv.ParseFloat(toExchange, 64)
-				amountUsdValue := amountUsd.(float64)
-				if toExchangeValue <= amountUsdValue {
+				toExchangeValue, _ := decimal.NewFromString(toExchange)
+				amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
+				if toExchangeValue.Cmp(amountUsdValue) == -1 {
 					fmt.Println("\nExchange of", toExchange, "usd has been requested.")
 					UsdToGoldAmount(toExchange, role)
 				} else {

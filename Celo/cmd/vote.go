@@ -4,7 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
+	// "strconv"
+	"github.com/shopspring/decimal"
 )
 
 // lockGold locks a specific amount of gold available
@@ -27,9 +28,10 @@ func elecVote(target []byte, role string) {
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				toVote := scanner.Text()
-				toVoteValue, _ := strconv.ParseFloat(toVote, 64)
-				nonvotingLockedGoldValue := nonvotingLockedGold.(float64)
-				if toVoteValue <= nonvotingLockedGoldValue {
+				toVoteValue, _ := decimal.NewFromString(toVote)
+				nonvotingLockedGoldValue, _ := decimal.NewFromString(fmt.Sprintf("%v", nonvotingLockedGold))
+
+				if toVoteValue.Cmp(nonvotingLockedGoldValue) == -1 {
 					fmt.Println("\nCasting", toVote, "votes has been requested.")
 					voteAmount(toVote, role)
 				} else {
@@ -48,12 +50,12 @@ func elecVote(target []byte, role string) {
 }
 
 func voteAmount(amount string, role string) {
-	toVote, _ := strconv.ParseFloat(amount, 64)
+	toVote, _ := decimal.NewFromString(amount)
 		if role == "group" {
-			fmt.Println("\nCasting", toVote, "votes from validator group to validator group")
-			ExecuteCmd("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + fmt.Sprintf("%f", toVote))
+			fmt.Println("\nCasting", toVote.String(), "votes from validator group to validator group")
+			ExecuteCmd("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + toVote.String())
 		} else if role == "validator" {
-			fmt.Println("\nCasting", toVote, "votes from validator to validator group")
-			ExecuteCmd("celocli election:vote --from $CELO_VALIDATOR_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + fmt.Sprintf("%f", toVote))
+			fmt.Println("\nCasting", toVote.String(), "votes from validator to validator group")
+			ExecuteCmd("celocli election:vote --from $CELO_VALIDATOR_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + toVote.String())
 		}
 }

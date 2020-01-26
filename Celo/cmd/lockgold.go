@@ -4,7 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
+	// "strconv"
+	"github.com/shopspring/decimal"
 )
 
 // lockGold locks a specific amount of gold available
@@ -27,9 +28,9 @@ func lockGold(target []byte, role string) {
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				toLock := scanner.Text()
-				toLockValue, _ := strconv.ParseFloat(toLock, 64)
-				amountGoldValue := amountGold.(float64)
-				if toLockValue <= amountGoldValue {
+				toLockValue, _ := decimal.NewFromString(toLock)
+				amountGoldValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountGold))
+				if toLockValue.Cmp(amountGoldValue) == -1 {
 					fmt.Println("\nLocking", toLock, "gold has been requested.")
 					lockGoldAmount(toLock, role)
 				} else {
@@ -48,9 +49,11 @@ func lockGold(target []byte, role string) {
 }
 
 func lockGoldAmount(amount string, role string) {
-	toLock, _ := strconv.ParseFloat(amount, 64)
-	toLock = toLock - 1000000000000000000
-	if toLock <= 0 {
+	toLock, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
+	reserve, _ := decimal.NewFromString("1000000000000000000")
+	toLock = toLock.Sub(reserve)
+	zeroValue, _ := decimal.NewFromString("0")
+	if toLock.Cmp(zeroValue) == -1 {
 		// fmt.Printf("%v is of the type %T", toLockAfter, toLockAfter)
 		fmt.Println("\n==> Not enough gold to set aside 1 gold for fees." + " Must have at least 1 gold reserved.")
 	} else {

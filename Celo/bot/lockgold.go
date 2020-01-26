@@ -2,9 +2,10 @@ package bot
 
 import (
     "fmt"
-	"strconv"
+	// "strconv"
     "log"
     "github.com/node_tooling/Celo/cmd"
+	"github.com/shopspring/decimal"
     tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -53,17 +54,19 @@ func lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, a
 }
 
 func lockGoldAmount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount string, role string) string {
-	toLock, _ := strconv.ParseFloat(amount, 64)
-	toLock = toLock - 1000000000000000000
-	if toLock <= 0 {
+	toLock, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
+	reserve, _ := decimal.NewFromString("1000000000000000000")
+	toLock = toLock.Sub(reserve)
+	zeroValue, _ := decimal.NewFromString("0")
+	if toLock.Cmp(zeroValue) == -1 {
 		msg.Text = warnText("Not enough gold to set aside 1 gold for fees. Must have at least 1 gold reserved.")
 	} else {
 		if role == "group" {
-			msg.Text = boldText("Locking " + fmt.Sprintf("%f", toLock) + " gold from validator group")
+			msg.Text = boldText("Locking " + toLock.String() + " gold from validator group")
 			if _, err := bot.Send(msg); err != nil {
             log.Panic(err)
         	}
-			output,_ := botExecCmdOut("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + fmt.Sprintf("%f", toLock), msg)
+			output,_ := botExecCmdOut("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + toLock.String(), msg)
 			outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 			if outputParsed == nil {
             	msg.Text = successText("Success")
@@ -71,11 +74,11 @@ func lockGoldAmount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount str
             	msg.Text = errText(fmt.Sprintf("%v", outputParsed))
         	}
 		} else if role == "validator" {
-			msg.Text = boldText("Locking " + fmt.Sprintf("%f", toLock) + " gold from validator")
+			msg.Text = boldText("Locking " + toLock.String() + " gold from validator")
 			if _, err := bot.Send(msg); err != nil {
             log.Panic(err)
         	}
-			output,_ := botExecCmdOut("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + fmt.Sprintf("%f", toLock), msg)
+			output,_ := botExecCmdOut("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + toLock.String(), msg)
 			outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 			if outputParsed == nil {
             	msg.Text = successText("Success")

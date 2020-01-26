@@ -3,8 +3,9 @@ package bot
 import (
 	"fmt"
     "log"
-    "strconv"
+    // "strconv"
     "github.com/node_tooling/Celo/cmd"
+    "github.com/shopspring/decimal"
     tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -40,13 +41,14 @@ func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, 
 	// if _, err := bot.Send(msg); err != nil {
 	// 	log.Panic(err)
 	// }
-    amountUsdValue := amountUsd.(float64)
-    if amountUsdValue > 0 {
-	    toExchange := fmt.Sprintf("%v", amountUsd)
+    amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
+    zeroValue, _ := decimal.NewFromString("0")
+    if amountUsdValue.Cmp(zeroValue) == 1 {
+	    toExchange := amountUsdValue.String()
 	    output := usdToGoldAmount(bot, msg, toExchange, role)
         msg.Text = output
     } else {
-        msg.Text = warnText("Don't bite more than you can chew! You only have " + fmt.Sprintf("%v", amountUsd) + " usd available")
+        msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
 	}
 
     return msg.Text
@@ -90,17 +92,17 @@ func getExchangeRate(msg tgbotapi.MessageConfig) string {
 	// }
 	cGold := cmd.ParseCmdOutput(output, "string", "(\\d.*) cGLD =>", 1)
     cUsd := cmd.ParseCmdOutput(output, "string", "=> (\\d.*) cUSD", 1)
-    cGoldFloat,_ := strconv.ParseFloat(fmt.Sprintf("%v", cGold), 64)
-    cUsdFloat,_ := strconv.ParseFloat(fmt.Sprintf("%v", cUsd), 64)
-    goldToUsdRatio := cUsdFloat / cGoldFloat
+    cGoldDecimal,_ := decimal.NewFromString(fmt.Sprintf("%v", cGold))
+    cUsdDecimal,_ := decimal.NewFromString(fmt.Sprintf("%v", cUsd))
+    goldToUsdRatio := cUsdDecimal.DivRound(cGoldDecimal, 18)
 
     cUsd2 := cmd.ParseCmdOutput(output, "string", "(\\d.*) cUSD =>", 1)
     cGold2 := cmd.ParseCmdOutput(output, "string", "=> (\\d.*) cGLD", 1)
-    cUsd2Float,_ := strconv.ParseFloat(fmt.Sprintf("%v", cUsd2), 64)
-    cGold2Float,_ := strconv.ParseFloat(fmt.Sprintf("%v", cGold2), 64)
-    usdToGoldRatio := cGold2Float / cUsd2Float
-    msgPiece1 := "1 cGLD = " + fmt.Sprintf("%f", goldToUsdRatio) + " cUSD\n" 
-    msgPiece2 := "1 cUSD = " + fmt.Sprintf("%f", usdToGoldRatio) + " cGLD"
-    msgPiece3 := boldText("\n\nResults are truncated")
-    return msgPiece1 + msgPiece2 + msgPiece3
+    cUsd2Decimal,_ := decimal.NewFromString(fmt.Sprintf("%v", cUsd2))
+    cGold2Decimal,_ := decimal.NewFromString(fmt.Sprintf("%v", cGold2))
+    usdToGoldRatio := cGold2Decimal.DivRound(cUsd2Decimal, 18)
+    msgPiece1 := "1 cGLD = " + goldToUsdRatio.String() + " cUSD\n" 
+    msgPiece2 := "1 cUSD = " + usdToGoldRatio.String() + " cGLD"
+    // msgPiece3 := boldText("\n\nResults are truncated")
+    return msgPiece1 + msgPiece2
 }

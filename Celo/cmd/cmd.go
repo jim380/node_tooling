@@ -46,7 +46,6 @@ func ParseCmdOutput(output []byte, parseType string, reg string, matchGr int) in
 	match := regexp.MustCompile(reg).FindStringSubmatch(string(output))
 	var result interface{}
 	if parseType == "int" {
-		// var result int
 		if match != nil {
 			if i, err := strconv.Atoi(match[matchGr]); err == nil {
 				result = i
@@ -54,7 +53,6 @@ func ParseCmdOutput(output []byte, parseType string, reg string, matchGr int) in
 		}
 		// fmt.Println("Test output: ", result)
 	} else if parseType == "float" {
-		// var result float64
 		if match != nil {
 			if i, err := strconv.ParseFloat(match[matchGr], 64); err == nil {
 				result = i
@@ -62,7 +60,6 @@ func ParseCmdOutput(output []byte, parseType string, reg string, matchGr int) in
 		}
 		// fmt.Println("Test output: ", result)
 	} else if parseType == "string" {
-		// var result float64
 		if match != nil {
 			// if i, err := string(match[1]); err == nil {
 			// 	result = i
