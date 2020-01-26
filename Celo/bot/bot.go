@@ -61,6 +61,9 @@ var electionVoteKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 type Balance struct {
     gold           string
     usd            string
+	lockedGold 	   string
+	nonVoting      string
+	total          string
 }
 type Validator struct {
     balance Balance
@@ -102,6 +105,7 @@ func BotRun() {
 			data := update.CallbackQuery.Data
 			chatId := update.CallbackQuery.Message.Chat.ID
 			msg := tgbotapi.NewMessage(chatId, "")
+			msg.ParseMode = "Markdown"
 			switch data {
 				case "valGrAll":
 					msg.Text = allLockedGold(bot, msg, "group")
@@ -158,12 +162,12 @@ func BotRun() {
 				command,_ := botExecCmdOut("celocli node:synced", msg)
 				msg.Text = string(command)
 			case "balance":
-				valBalance,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
-				valB := botGetValBalance(valBalance)
 				valGrBalance,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-				valGrB := botGetValBalance(valGrBalance)
-				msgPiece1 := `*gold*: ` + valGrB.balance.gold + "\n" + `*usd*: ` + valGrB.balance.usd + "\n"
-				msgPiece2 := `*gold*: ` + valB.balance.gold + "\n" + `*usd*: ` + valB.balance.usd + "\n"
+				valGrB := botUpdateBalance(valGrBalance)
+				valBalance,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+				valB := botUpdateBalance(valBalance)
+				msgPiece1 := `*gold*: ` + valGrB.balance.gold + "\n" + `*lockedGold*: ` + valGrB.balance.lockedGold + "\n" + `*usd*: ` + valGrB.balance.usd + "\n" + `*total*: ` + valGrB.balance.total + "\n"
+				msgPiece2 := `*gold*: ` + valB.balance.gold + "\n" + `*lockedGold*: ` + valB.balance.lockedGold + "\n" + `*usd*: ` + valB.balance.usd + "\n" + `*total*: ` + valB.balance.total + "\n"
 				msg.Text = "Validator Group\n" + msgPiece1 + "--------------\n" + "Validator\n" + msgPiece2
 			case "status":
 				command,_ := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS", msg)
@@ -241,11 +245,17 @@ func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, string) {
 	return output, msg.Text
 }
 
-func botGetValBalance(target []byte) Validator{
+func botUpdateBalance(target []byte) Validator{
     gold := cmd.AmountAvailable(target, "gold")
     goldVal := fmt.Sprintf("%v", gold)
     usd := cmd.AmountAvailable(target, "usd")
     usdVal := fmt.Sprintf("%v", usd)
-    b := Validator {balance: Balance{gold: goldVal, usd: usdVal},}
+	lockedGold := cmd.AmountAvailable(target, "lockedGold")
+    lockedGoldVal := fmt.Sprintf("%v", lockedGold)
+	nonVotinglockedGold := cmd.AmountAvailable(target, "nonvotingLockedGold")
+    nonVotinglockedGoldVal := fmt.Sprintf("%v", nonVotinglockedGold)
+	total := cmd.AmountAvailable(target, "total")
+    totalVal := fmt.Sprintf("%v", total)
+    b := Validator {balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotinglockedGoldVal,total: totalVal},}
     return b
 }

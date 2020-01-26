@@ -83,19 +83,33 @@ func AmountAvailable(target []byte, asset string) interface{} {
 		} else {
 			fmt.Printf("\nYou have %v gold available to lock\n", result)
 		}
-	case "nonvotingLockedGold":
-		result = ParseCmdOutput(target, "float", "nonvoting: (\\d.\\d*)", 1)
-		if result == nil {
-			fmt.Printf("\nYou have no nonvoting lockedGold available\n")
-		} else {
-			fmt.Printf("\nYou have %v nonvoting lockedGold\n", result)
-		}
 	case "usd":
 		result = ParseCmdOutput(target, "float", "usd: (\\d.\\d*.+)", 1)
 		if result == nil {
 			fmt.Printf("\nYou have no usd available\n")
 		} else {
 			fmt.Printf("\nYou have %v usd available to exchange\n", result)
+		}
+		case "lockedGold":
+		result = ParseCmdOutput(target, "float", "lockedGold: (\\d.\\d*.+)", 1)
+		if result == nil {
+			fmt.Printf("\nYou have no lockedGold available\n")
+		} else {
+			fmt.Printf("\nYou have %v lockedGold\n", result)
+		}
+	case "total":
+		result = ParseCmdOutput(target, "float", "total: (\\d.\\d*.+)", 1)
+		if result == nil {
+			fmt.Printf("\nYou have no gold available\n")
+		} else {
+			fmt.Printf("\nYou have %v gold in total\n", result)
+	}
+	case "nonvotingLockedGold":
+		result = ParseCmdOutput(target, "float", "nonvoting: (\\d.\\d*)", 1)
+		if result == nil {
+			fmt.Printf("\nYou have no nonvoting lockedGold available\n")
+		} else {
+			fmt.Printf("\nYou have %v nonvoting lockedGold\n", result)
 		}
 	}
 	return result

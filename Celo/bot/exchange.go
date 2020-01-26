@@ -16,21 +16,35 @@ func allExchangeUsd(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role strin
 		log.Panic(err)
 	}
     if role == "group" {
-        usd, balanceOutput := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-        msg.Text = balanceOutput
+        usd, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+        // msg.Text = balanceOutput
+        // if _, err := bot.Send(msg); err != nil {
+        //     log.Panic(err)
+        // }
+        output := usdToGold(bot, msg, usd, role)
+        msg.Text = output
         if _, err := bot.Send(msg); err != nil {
             log.Panic(err)
         }
-        output := usdToGold(bot, msg, usd, role)
-        msg.Text = output
+        target,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+		balanceUpdate := botUpdateBalance(target)
+		msgPiece := `gold: ` + balanceUpdate.balance.gold + "\n" + `usd: ` + balanceUpdate.balance.usd
+        msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
     } else if role == "validator" {
-        usd, balanceOutput := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
-        msg.Text = balanceOutput
+        usd, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+        // msg.Text = balanceOutput
+        // if _, err := bot.Send(msg); err != nil {
+        //     log.Panic(err)
+        // }
+        output := usdToGold(bot, msg, usd, role)
+        msg.Text = output
         if _, err := bot.Send(msg); err != nil {
             log.Panic(err)
         }
-        output := usdToGold(bot, msg, usd, role)
-        msg.Text = output
+        target,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+		balanceUpdate := botUpdateBalance(target)
+		msgPiece := `gold: ` + balanceUpdate.balance.gold + "\n" + `usd: ` + balanceUpdate.balance.usd
+        msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
     }
     return msg.Text
 }

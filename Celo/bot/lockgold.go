@@ -17,21 +17,35 @@ func allLockedGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string
 		log.Panic(err)
 	}
     if role == "group" {
-        gold, balanceOutput := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-        msg.Text = balanceOutput
-        if _, err := bot.Send(msg); err != nil {
-            log.Panic(err)
-        }
+        gold, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+        // msg.Text = balanceOutput
+        // if _, err := bot.Send(msg); err != nil {
+        //     log.Panic(err)
+        // }
         output := lockGold(bot, msg, gold, "all", role)
         msg.Text = output
+		if _, err := bot.Send(msg); err != nil {
+            log.Panic(err)
+        }
+		target,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+		balanceUpdate := botUpdateBalance(target)
+		msgPiece := `gold: ` + balanceUpdate.balance.gold + "\n" + `lockedGold: ` + balanceUpdate.balance.lockedGold
+        msg.Text = boldText("Validator Group Balance After Locking") + "\n\n" + msgPiece
     } else if role == "validator" {
-        gold, balanceOutput := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
-        msg.Text = balanceOutput
-        if _, err := bot.Send(msg); err != nil {
-            log.Panic(err)
-        }
+        gold, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+        // msg.Text = balanceOutput
+        // if _, err := bot.Send(msg); err != nil {
+        //     log.Panic(err)
+        // }
         output := lockGold(bot, msg, gold, "all", role)
         msg.Text = output
+		if _, err := bot.Send(msg); err != nil {
+            log.Panic(err)
+        }
+		target,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+		balanceUpdate := botUpdateBalance(target)
+		msgPiece := `gold: ` + balanceUpdate.balance.gold + "\n" + `lockedGold: ` + balanceUpdate.balance.lockedGold
+        msg.Text = boldText("Validator Balance After Locking") + "\n\n" + msgPiece
     }
     return msg.Text
 }
