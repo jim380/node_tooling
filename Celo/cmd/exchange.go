@@ -23,7 +23,7 @@ func UsdToGold(target []byte, role string) {
 			if amountUsdValue.Cmp(zeroValue) == 1 {
                 fmt.Println("\nExchange of", amountUsd, "usd has been requested.")
 			    toExchange := fmt.Sprintf("%v", amountUsd)
-			    UsdToGoldAmount(toExchange, role)
+			    UsdToGoldExecute(toExchange, role)
             } else {
 					fmt.Println("\n==> Don't bite more than you can chew!")
 					fmt.Println("    You only have " + fmt.Sprintf("%v", amountUsd) + " usd available")
@@ -38,7 +38,7 @@ func UsdToGold(target []byte, role string) {
 				amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
 				if toExchangeValue.Cmp(amountUsdValue) == -1 {
 					fmt.Println("\nExchange of", toExchange, "usd has been requested.")
-					UsdToGoldAmount(toExchange, role)
+					UsdToGoldExecute(toExchange, role)
 				} else {
 					fmt.Println("\n==> Don't bite more than you can chew!")
 					fmt.Println("    You only have " + fmt.Sprintf("%v", amountUsd) + " usd available")
@@ -54,7 +54,7 @@ func UsdToGold(target []byte, role string) {
 	}
 }
 
-func UsdToGoldAmount(amount string, role string) {
+func UsdToGoldExecute(amount string, role string) {
 	//toExchange, _ := strconv.Atoi(amount)
     if role == "group" {
         fmt.Println("\nExchanging", amount, "usd from validator group")

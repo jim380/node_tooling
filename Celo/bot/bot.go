@@ -46,7 +46,19 @@ var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 
 var exchangeUsdKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group 25%", "valGrOneForthUsd"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group 50%", "valGrHalfUsd"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group 75%", "valGrFourThirdsUsd"),
 		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAllUsd"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Validator 25%", "valOneFourthUsd"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator 50%", "valHalfUsd"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Validator 75%", "valFourThirdsUsd"),
 		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAllUsd"),
 	),
 )
@@ -120,10 +132,28 @@ func BotRun() {
 					msg.Text = "Locking a specific amount from validator group was requested"
 					break
 				case "valGrAllUsd":
-					msg.Text = allExchangeUsd(bot, msg, "group")
+					msg.Text = allExchangeUsd(bot, msg, "group", 100)
+					break
+				case "valGrHalfUsd":
+					msg.Text = allExchangeUsd(bot, msg, "group", 50)
+					break
+				case "valGrOneForthUsd":
+					msg.Text = allExchangeUsd(bot, msg, "group", 25)
+					break
+				case "valGrFourThirdsUsd":
+					msg.Text = allExchangeUsd(bot, msg, "group", 75)
 					break
 				case "valAllUsd":
-					msg.Text = allExchangeUsd(bot, msg, "validator")
+					msg.Text = allExchangeUsd(bot, msg, "validator", 100)
+					break
+				case "valHalfUsd":
+					msg.Text = allExchangeUsd(bot, msg, "validator", 50)
+					break
+				case "valOneForthUsd":
+					msg.Text = allExchangeUsd(bot, msg, "validator", 25)
+					break
+				case "valFourThirdsUsd":
+					msg.Text = allExchangeUsd(bot, msg, "validator", 75)
 					break
 				case "valGrAllVote":
 					msg.Text = allVote(bot, msg, "group")
@@ -162,13 +192,11 @@ func BotRun() {
 				command,_ := botExecCmdOut("celocli node:synced", msg)
 				msg.Text = string(command)
 			case "balance":
-				valGrBalance,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-				valGrB := botUpdateBalance(valGrBalance)
-				valBalance,_ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
-				valB := botUpdateBalance(valBalance)
-				msgPiece1 := `*gold*: ` + valGrB.balance.gold + "\n" + `*lockedGold*: ` + valGrB.balance.lockedGold + "\n" + `*usd*: ` + valGrB.balance.usd + "\n" + `*total*: ` + valGrB.balance.total + "\n"
-				msgPiece2 := `*gold*: ` + valB.balance.gold + "\n" + `*lockedGold*: ` + valB.balance.lockedGold + "\n" + `*usd*: ` + valB.balance.usd + "\n" + `*total*: ` + valB.balance.total + "\n"
-				msg.Text = "Validator Group\n" + msgPiece1 + "--------------\n" + "Validator\n" + msgPiece2
+				balanceValGr := botUpdateBalance("group", msg)
+				balanceVal := botUpdateBalance("validator", msg)
+				msgPiece1 := `*gold*: ` + balanceValGr.(ValidatorGr).balance.gold + "\n" + `*lockedGold*: ` + balanceValGr.(ValidatorGr).balance.lockedGold + "\n" + `*usd*: ` + balanceValGr.(ValidatorGr).balance.usd + "\n" + `*total*: ` + balanceValGr.(ValidatorGr).balance.total + "\n"
+				msgPiece2 := `*gold*: ` + balanceVal.(Validator).balance.gold + "\n" + `*lockedGold*: ` + balanceVal.(Validator).balance.lockedGold + "\n" + `*usd*: ` + balanceVal.(Validator).balance.usd + "\n" + `*total*: ` + balanceVal.(Validator).balance.total + "\n"
+				msg.Text = "Validator Group\n\n" + msgPiece1 + "--------------\n" + "Validator\n\n" + msgPiece2
 			case "status":
 				command,_ := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS", msg)
 				words := cmd.ParseCmdOutput(command, "string", "(true|false)\\s*(true|false)\\s*(\\d*)\\s*(\\d*.)", 0)
@@ -245,7 +273,14 @@ func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, string) {
 	return output, msg.Text
 }
 
-func botUpdateBalance(target []byte) Validator{
+func botUpdateBalance(role string,  msg tgbotapi.MessageConfig) interface{} {
+	var target []byte
+	var result interface{}
+	if role == "group" {
+		target, _ = botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+	} else if role == "validator" {
+		target, _ = botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+	}
     gold := cmd.AmountAvailable(target, "gold")
     goldVal := fmt.Sprintf("%v", gold)
     usd := cmd.AmountAvailable(target, "usd")
@@ -256,6 +291,10 @@ func botUpdateBalance(target []byte) Validator{
     nonVotinglockedGoldVal := fmt.Sprintf("%v", nonVotinglockedGold)
 	total := cmd.AmountAvailable(target, "total")
     totalVal := fmt.Sprintf("%v", total)
-    b := Validator {balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotinglockedGoldVal,total: totalVal},}
-    return b
+	if role == "group" {
+		result = ValidatorGr {balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotinglockedGoldVal,total: totalVal},}
+	} else if role == "validator" {
+		result = Validator {balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotinglockedGoldVal,total: totalVal},}
+	}
+    return result
 }
