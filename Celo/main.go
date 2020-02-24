@@ -31,10 +31,10 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
+	"github.com/node_tooling/Celo/bot"
 	"github.com/node_tooling/Celo/cmd"
 	"github.com/node_tooling/Celo/setup"
 	"github.com/node_tooling/Celo/util"
-	"github.com/node_tooling/Celo/bot"
 )
 
 func main() {
@@ -59,7 +59,7 @@ func main() {
 			log.Fatal("Error loading .env file")
 		}
 		util.SetEnv()
-		bot.BotRun()
+		bot.Run()
 	} else if !cmdInput {
 		//fmt.Println("Invalid flag value. flag.Args() is:", flag.Args())
 		err := godotenv.Load("config.env")
