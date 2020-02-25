@@ -86,8 +86,8 @@ func AmountAvailable(target []byte, asset string) interface{} {
 			fmt.Printf("\nYou have no gold available\n")
 		} else {
 			fmt.Printf("\nYou have %v gold in total\n", result)
-	}
-	case "nonvotingLockedGold":
+		}
+	case "nonVoting":
 		result = ParseCmdOutput(target, "float", "nonvoting: (\\d.\\d*)", 1)
 		if result == nil {
 			result = "0"

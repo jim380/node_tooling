@@ -281,14 +281,16 @@ func valGetBalance(msg tgbotapi.MessageConfig) Validator {
 func (v *Validator) getBalance(msg tgbotapi.MessageConfig) Validator {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
 	gold := cmd.AmountAvailable(target, "gold")
-	goldVal := fmt.Sprintf("%v", gold)
+	goldVal := isZero(gold, "goldVal")
 	usd := cmd.AmountAvailable(target, "usd")
-	usdVal := fmt.Sprintf("%v", usd)
+	usdVal := isZero(usd, "usdVal")
 	lockedGold := cmd.AmountAvailable(target, "lockedGold")
-	lockedGoldVal := fmt.Sprintf("%v", lockedGold)
+	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
+	nonVotingLockedGold := cmd.AmountAvailable(target, "nonVotingLockedGold")
+	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
 	total := cmd.AmountAvailable(target, "total")
-	totalVal := fmt.Sprintf("%v", total)
-	res := Validator{balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, total: totalVal}}
+	totalVal := isZero(total, "totalVal")
+	res := Validator{balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotingLockedGoldVal, total: totalVal}}
 	return res
 }
 
@@ -296,20 +298,15 @@ func (vgr *ValidatorGr) getBalance(msg tgbotapi.MessageConfig) ValidatorGr {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 	// TO-DO extract the logic for checking if zero
 	gold := cmd.AmountAvailable(target, "gold")
-	var goldVal string
-	if isZero(gold) {
-		goldVal = "0"
-	} else {
-		goldVal = fmt.Sprintf("%v", gold)
-	}
+	goldVal := isZero(gold, "goldVal")
 	usd := cmd.AmountAvailable(target, "usd")
-	usdVal := fmt.Sprintf("%v", usd)
+	usdVal := isZero(usd, "usdVal")
 	lockedGold := cmd.AmountAvailable(target, "lockedGold")
-	lockedGoldVal := fmt.Sprintf("%v", lockedGold)
+	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
 	nonVotingLockedGold := cmd.AmountAvailable(target, "nonVotingLockedGold")
-	nonVotingLockedGoldVal := fmt.Sprintf("%v", nonVotingLockedGold)
+	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
 	total := cmd.AmountAvailable(target, "total")
-	totalVal := fmt.Sprintf("%v", total)
+	totalVal := isZero(total, "totalVal")
 	res := ValidatorGr{balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotingLockedGoldVal, total: totalVal}}
 	return res
 }

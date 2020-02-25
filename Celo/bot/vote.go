@@ -40,8 +40,8 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 }
 
 func allVoteValidate(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, role string) string {
-	nonvotingLockedGold := cmd.AmountAvailable(target, "nonvotingLockedGold")
-	nonvotingLockedGoldValue, _ := decimal.NewFromString(fmt.Sprintf("%v", nonvotingLockedGold))
+	nonVoting := cmd.AmountAvailable(target, "nonVoting")
+	nonvotingLockedGoldValue, _ := decimal.NewFromString(fmt.Sprintf("%v", nonVoting))
 	zeroValue, _ := decimal.NewFromString("0")
 	if nonvotingLockedGoldValue.Cmp(zeroValue) == 1 {
 		toVote := nonvotingLockedGoldValue.String()
