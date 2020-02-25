@@ -26,7 +26,7 @@ func allExchangeUsd(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role strin
 			output := usdToGold(bot, msg, usd, role, 75)
 			botSendMsg(bot, msg, output)
 		}
-		valGrBalance := valGetBalance(msg)
+		valGrBalance := valGrGetBalance(msg)
 		msgPiece := `gold: ` + valGrBalance.balance.gold + "\n" + `usd: ` + valGrBalance.balance.usd
 		msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 	} else if role == "validator" {
@@ -44,7 +44,7 @@ func allExchangeUsd(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role strin
 			output := usdToGold(bot, msg, usd, role, 75)
 			botSendMsg(bot, msg, output)
 		}
-		valBalance := valGrGetBalance(msg)
+		valBalance := valGetBalance(msg)
 		msgPiece := `gold: ` + valBalance.balance.gold + "\n" + `usd: ` + valBalance.balance.usd
 		msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 	}

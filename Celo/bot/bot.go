@@ -193,8 +193,8 @@ func Run() {
 			command, _ := botExecCmdOut("celocli node:synced", msg)
 			msg.Text = string(command)
 		case "balance":
-			valGrBalance := valGetBalance(msg)
-			valBalance := valGrGetBalance(msg)
+			valGrBalance := valGrGetBalance(msg)
+			valBalance := valGetBalance(msg)
 			msgPiece1 := `*gold*: ` + valGrBalance.balance.gold + "\n" + `*lockedGold*: ` + valGrBalance.balance.lockedGold + "\n" + `*usd*: ` + valGrBalance.balance.usd + "\n" + `*non-voting*: ` + valGrBalance.balance.nonVoting + "\n" + `*total*: ` + valGrBalance.balance.total + "\n"
 			msgPiece2 := `*gold*: ` + valBalance.balance.gold + "\n" + `*lockedGold*: ` + valBalance.balance.lockedGold + "\n" + `*usd*: ` + valBalance.balance.usd + "\n" + `*non-voting*: ` + valBalance.balance.nonVoting + "\n" + `*total*: ` + valBalance.balance.total + "\n"
 			msg.Text = "Validator Group\n\n" + msgPiece1 + "--------------\n" + "Validator\n\n" + msgPiece2
@@ -213,24 +213,24 @@ func Run() {
 			words := cmd.ParseCmdOutput(command, "string", "score: (\\d.\\d*)", 1)
 			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
 		case "lockgold":
-			valGrBalance := valGetBalance(msg)
-			valBalance := valGrGetBalance(msg)
+			valGrBalance := valGrGetBalance(msg)
+			valBalance := valGetBalance(msg)
 			msgPiece1 := boldText("Gold Available\n") + "Validator Group: " + valGrBalance.balance.gold + "\n"
 			msgPiece2 := "Validator: " + valBalance.balance.gold + "\n"
 			msgPiece3 := "\nHow much would you like to lock?"
 			msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 			msg.ReplyMarkup = lockGoldKeyboard
 		case "exchange":
-			valGrBalance := valGetBalance(msg)
-			valBalance := valGrGetBalance(msg)
+			valGrBalance := valGrGetBalance(msg)
+			valBalance := valGetBalance(msg)
 			msgPiece1 := boldText("USD Available\n") + "Validator Group: " + valGrBalance.balance.usd + "\n"
 			msgPiece2 := "Validator: " + valBalance.balance.usd + "\n"
 			msgPiece3 := "\nHow much would you like to exchange?\n"
 			msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 			msg.ReplyMarkup = exchangeUsdKeyboard
 		case "vote":
-			valGrBalance := valGetBalance(msg)
-			valBalance := valGrGetBalance(msg)
+			valGrBalance := valGrGetBalance(msg)
+			valBalance := valGetBalance(msg)
 			if valGrBalance.balance.nonVoting == "" && valBalance.balance.nonVoting == "" {
 				msg.Text = "You have no non-voting lockedGold available"
 			} else {

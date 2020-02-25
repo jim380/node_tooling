@@ -15,7 +15,7 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		nonvotingGold, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 		output := allVoteValidate(bot, msg, nonvotingGold, role)
 		botSendMsg(bot, msg, output)
-		valGrBalance := valGetBalance(msg)
+		valGrBalance := valGrGetBalance(msg)
 		// TO-DO validation needs fixed
 		if valGrBalance.balance.nonVoting == "" {
 			msgPiece := `non-voting: 0`
@@ -27,7 +27,7 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		nonvotingGold, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
 		output := allVoteValidate(bot, msg, nonvotingGold, role)
 		botSendMsg(bot, msg, output)
-		valBalance := valGrGetBalance(msg)
+		valBalance := valGetBalance(msg)
 		// TO-DO validation needs fixed
 		if valBalance.balance.nonVoting == "" {
 			msgPiece := `non-voting: 0`
