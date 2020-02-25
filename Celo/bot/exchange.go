@@ -55,18 +55,18 @@ func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, 
 	amountUsd := cmd.AmountAvailable(target, "usd")
 	switch perct {
 	case 25:
-		usdToGoldValidate(bot, msg, amountUsd, "4", role)
+		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "4", role)
 	case 50:
-		usdToGoldValidate(bot, msg, amountUsd, "2", role)
+		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "2", role)
 	case 75:
-		usdToGoldValidate(bot, msg, amountUsd, "1.333333", role)
+		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "1.333333", role)
 	case 100:
-		usdToGoldValidate(bot, msg, amountUsd, "", role)
+		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "", role)
 	}
 	return msg.Text
 }
 
-func usdToGoldValidate(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount interface{}, div string, role string) {
+func usdToGoldValidate(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount interface{}, div string, role string) string {
 	if div == "" {
 		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
 		zeroValue, _ := decimal.NewFromString("0")
@@ -90,6 +90,8 @@ func usdToGoldValidate(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount 
 			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
 		}
 	}
+
+	return msg.Text
 }
 
 func usdToGoldExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount string, role string) string {
