@@ -280,13 +280,14 @@ func valGetBalance(msg tgbotapi.MessageConfig) Validator {
 
 func (v *Validator) getBalance(msg tgbotapi.MessageConfig) Validator {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
+	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
 	gold := cmd.AmountAvailable(target, "gold")
 	goldVal := isZero(gold, "goldVal")
 	usd := cmd.AmountAvailable(target, "usd")
 	usdVal := isZero(usd, "usdVal")
 	lockedGold := cmd.AmountAvailable(target, "lockedGold")
 	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
-	nonVotingLockedGold := cmd.AmountAvailable(target, "nonVotingLockedGold")
+	nonVotingLockedGold := cmd.AmountAvailable(target1, "nonVotingLockedGold")
 	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
 	total := cmd.AmountAvailable(target, "total")
 	totalVal := isZero(total, "totalVal")
@@ -296,6 +297,7 @@ func (v *Validator) getBalance(msg tgbotapi.MessageConfig) Validator {
 
 func (vgr *ValidatorGr) getBalance(msg tgbotapi.MessageConfig) ValidatorGr {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
+	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 	// TO-DO extract the logic for checking if zero
 	gold := cmd.AmountAvailable(target, "gold")
 	goldVal := isZero(gold, "goldVal")
@@ -303,7 +305,7 @@ func (vgr *ValidatorGr) getBalance(msg tgbotapi.MessageConfig) ValidatorGr {
 	usdVal := isZero(usd, "usdVal")
 	lockedGold := cmd.AmountAvailable(target, "lockedGold")
 	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
-	nonVotingLockedGold := cmd.AmountAvailable(target, "nonVotingLockedGold")
+	nonVotingLockedGold := cmd.AmountAvailable(target1, "nonVotingLockedGold")
 	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
 	total := cmd.AmountAvailable(target, "total")
 	totalVal := isZero(total, "totalVal")

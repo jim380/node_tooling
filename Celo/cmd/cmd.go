@@ -89,6 +89,7 @@ func AmountAvailable(target []byte, asset string) interface{} {
 		}
 	case "nonVotingLockedGold":
 		result = ParseCmdOutput(target, "float", "nonvoting: (\\d.\\d*)", 1)
+		// fmt.Printf("----value-----: %v", result) <-- prints nil
 		if result == nil {
 			result = "0"
 			fmt.Printf("\nYou have no nonvoting lockedGold available\n")
