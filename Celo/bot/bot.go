@@ -133,28 +133,28 @@ func Run() {
 				msg.Text = "Locking a specific amount from validator group was requested"
 				break
 			case "valGrAllUsd":
-				msg.Text = allExchangeUsd(bot, msg, "group", 100)
+				msg.Text = exchangeUSDRun(bot, msg, "group", 100)
 				break
 			case "valGrHalfUsd":
-				msg.Text = allExchangeUsd(bot, msg, "group", 50)
+				msg.Text = exchangeUSDRun(bot, msg, "group", 50)
 				break
 			case "valGrOneForthUsd":
-				msg.Text = allExchangeUsd(bot, msg, "group", 25)
+				msg.Text = exchangeUSDRun(bot, msg, "group", 25)
 				break
 			case "valGrFourThirdsUsd":
-				msg.Text = allExchangeUsd(bot, msg, "group", 75)
+				msg.Text = exchangeUSDRun(bot, msg, "group", 75)
 				break
 			case "valAllUsd":
-				msg.Text = allExchangeUsd(bot, msg, "validator", 100)
+				msg.Text = exchangeUSDRun(bot, msg, "validator", 100)
 				break
 			case "valHalfUsd":
-				msg.Text = allExchangeUsd(bot, msg, "validator", 50)
+				msg.Text = exchangeUSDRun(bot, msg, "validator", 50)
 				break
 			case "valOneForthUsd":
-				msg.Text = allExchangeUsd(bot, msg, "validator", 25)
+				msg.Text = exchangeUSDRun(bot, msg, "validator", 25)
 				break
 			case "valFourThirdsUsd":
-				msg.Text = allExchangeUsd(bot, msg, "validator", 75)
+				msg.Text = exchangeUSDRun(bot, msg, "validator", 75)
 				break
 			case "valGrAllVote":
 				msg.Text = allVote(bot, msg, "group")

@@ -8,7 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func allExchangeUsd(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string, perct uint) string {
+func exchangeUSDRun(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string, perct uint) string {
 	msg.ParseMode = "Markdown"
 	botSendMsg(bot, msg, boldText("Exchange of all gold from "+role+" was requested"))
 	if role == "group" {
@@ -55,33 +55,20 @@ func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, 
 	amountUsd := cmd.AmountAvailable(target, "usd")
 	switch perct {
 	case 25:
-		dividend, _ := decimal.NewFromString("4")
-		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
-		amountUsdValue = amountUsdValue.DivRound(dividend, 18)
-		zeroValue, _ := decimal.NewFromString("0")
-		if amountUsdValue.Cmp(zeroValue) == 1 {
-			toExchange := amountUsdValue.String()
-			output := usdToGoldExecute(bot, msg, toExchange, role)
-			msg.Text = output
-		} else {
-			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
-		}
+		usdToGoldValidate(bot, msg, amountUsd, "4", role)
 	case 50:
-		dividend, _ := decimal.NewFromString("2")
-		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
-		amountUsdValue = amountUsdValue.DivRound(dividend, 18)
-		zeroValue, _ := decimal.NewFromString("0")
-		if amountUsdValue.Cmp(zeroValue) == 1 {
-			toExchange := amountUsdValue.String()
-			output := usdToGoldExecute(bot, msg, toExchange, role)
-			msg.Text = output
-		} else {
-			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
-		}
+		usdToGoldValidate(bot, msg, amountUsd, "2", role)
 	case 75:
-		dividend, _ := decimal.NewFromString("1.333333")
-		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
-		amountUsdValue = amountUsdValue.DivRound(dividend, 0)
+		usdToGoldValidate(bot, msg, amountUsd, "1.333333", role)
+	case 100:
+		usdToGoldValidate(bot, msg, amountUsd, "", role)
+	}
+	return msg.Text
+}
+
+func usdToGoldValidate(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount interface{}, div string, role string) {
+	if div == "" {
+		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
 		zeroValue, _ := decimal.NewFromString("0")
 		if amountUsdValue.Cmp(zeroValue) == 1 {
 			toExchange := amountUsdValue.String()
@@ -90,8 +77,10 @@ func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, 
 		} else {
 			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
 		}
-	case 100:
-		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amountUsd))
+	} else {
+		dividend, _ := decimal.NewFromString(div)
+		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
+		amountUsdValue = amountUsdValue.DivRound(dividend, 18)
 		zeroValue, _ := decimal.NewFromString("0")
 		if amountUsdValue.Cmp(zeroValue) == 1 {
 			toExchange := amountUsdValue.String()
@@ -101,7 +90,6 @@ func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, 
 			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
 		}
 	}
-	return msg.Text
 }
 
 func usdToGoldExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount string, role string) string {
