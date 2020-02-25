@@ -17,7 +17,7 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		botSendMsg(bot, msg, output)
 		valGrBalance := valGetBalance(msg)
 		// TO-DO validation needs fixed
-                if valGrBalance.balance.nonVoting == "" {
+		if valGrBalance.balance.nonVoting == "" {
 			msgPiece := `non-voting: 0`
 			msg.Text = boldText("Validator group lockedGold after voting") + "\n\n" + msgPiece
 		}
