@@ -16,11 +16,6 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		output := allVoteValidate(bot, msg, nonvotingGold, role)
 		botSendMsg(bot, msg, output)
 		valGrBalance := valGrGetBalance(msg)
-		// TO-DO validation needs fixed
-		if valGrBalance.balance.nonVoting == "" {
-			msgPiece := `non-voting: 0`
-			msg.Text = boldText("Validator group lockedGold after voting") + "\n\n" + msgPiece
-		}
 		msgPiece := `non-voting: ` + valGrBalance.balance.nonVoting
 		msg.Text = boldText("Validator group lockedGold after voting") + "\n\n" + msgPiece
 	} else if role == "validator" {
@@ -28,11 +23,6 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		output := allVoteValidate(bot, msg, nonvotingGold, role)
 		botSendMsg(bot, msg, output)
 		valBalance := valGetBalance(msg)
-		// TO-DO validation needs fixed
-		if valBalance.balance.nonVoting == "" {
-			msgPiece := `non-voting: 0`
-			msg.Text = boldText("Validator group lockedGold after voting") + "\n\n" + msgPiece
-		}
 		msgPiece := `non-voting: ` + valBalance.balance.nonVoting
 		msg.Text = boldText("Validator lockedGold after voting") + "\n\n" + msgPiece
 	}
