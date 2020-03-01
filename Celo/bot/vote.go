@@ -15,15 +15,17 @@ func allVote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string) stri
 		nonvotingGold, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 		output := allVoteValidate(bot, msg, nonvotingGold, role)
 		botSendMsg(bot, msg, output)
-		valGrBalance := valGrGetBalance(msg)
-		msgPiece := `non-voting: ` + valGrBalance.balance.nonVoting
+		var valGr validatorGr
+		UpdateBalance(&valGr, msg)
+		msgPiece := `non-voting: ` + valGr.balance.nonVoting
 		msg.Text = boldText("Validator group lockedGold after voting") + "\n\n" + msgPiece
 	} else if role == "validator" {
 		nonvotingGold, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
 		output := allVoteValidate(bot, msg, nonvotingGold, role)
 		botSendMsg(bot, msg, output)
-		valBalance := valGetBalance(msg)
-		msgPiece := `non-voting: ` + valBalance.balance.nonVoting
+		var val validator
+		UpdateBalance(&val, msg)
+		msgPiece := `non-voting: ` + val.balance.nonVoting
 		msg.Text = boldText("Validator lockedGold after voting") + "\n\n" + msgPiece
 	}
 	return msg.Text

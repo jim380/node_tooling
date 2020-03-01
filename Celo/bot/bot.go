@@ -71,18 +71,24 @@ var electionVoteKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	),
 )
 
-type Balance struct {
+type action interface {
+	getBalance(msg tgbotapi.MessageConfig)
+}
+
+type balance struct {
 	gold       string
 	usd        string
 	lockedGold string
 	nonVoting  string
 	total      string
 }
-type Validator struct {
-	balance Balance
+
+type validator struct {
+	balance
 }
-type ValidatorGr struct {
-	balance Balance
+
+type validatorGr struct {
+	balance
 }
 
 func Run() {
@@ -193,10 +199,12 @@ func Run() {
 			command, _ := botExecCmdOut("celocli node:synced", msg)
 			msg.Text = string(command)
 		case "balance":
-			valGrBalance := valGrGetBalance(msg)
-			valBalance := valGetBalance(msg)
-			msgPiece1 := `*gold*: ` + valGrBalance.balance.gold + "\n" + `*lockedGold*: ` + valGrBalance.balance.lockedGold + "\n" + `*usd*: ` + valGrBalance.balance.usd + "\n" + `*non-voting*: ` + valGrBalance.balance.nonVoting + "\n" + `*total*: ` + valGrBalance.balance.total + "\n"
-			msgPiece2 := `*gold*: ` + valBalance.balance.gold + "\n" + `*lockedGold*: ` + valBalance.balance.lockedGold + "\n" + `*usd*: ` + valBalance.balance.usd + "\n" + `*non-voting*: ` + valBalance.balance.nonVoting + "\n" + `*total*: ` + valBalance.balance.total + "\n"
+			var valGr validatorGr
+			var val validator
+			UpdateBalance(&valGr, msg)
+			UpdateBalance(&val, msg)
+			msgPiece1 := `*gold*: ` + valGr.balance.gold + "\n" + `*lockedGold*: ` + valGr.balance.lockedGold + "\n" + `*usd*: ` + valGr.balance.usd + "\n" + `*non-voting*: ` + valGr.balance.nonVoting + "\n" + `*total*: ` + valGr.balance.total + "\n"
+			msgPiece2 := `*gold*: ` + val.balance.gold + "\n" + `*lockedGold*: ` + val.balance.lockedGold + "\n" + `*usd*: ` + val.balance.usd + "\n" + `*non-voting*: ` + val.balance.nonVoting + "\n" + `*total*: ` + val.balance.total + "\n"
 			msg.Text = "Validator Group\n\n" + msgPiece1 + "--------------\n" + "Validator\n\n" + msgPiece2
 		case "status":
 			command, _ := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS", msg)
@@ -213,29 +221,35 @@ func Run() {
 			words := cmd.ParseCmdOutput(command, "string", "score: (\\d.\\d*)", 1)
 			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
 		case "lockgold":
-			valGrBalance := valGrGetBalance(msg)
-			valBalance := valGetBalance(msg)
-			msgPiece1 := boldText("Gold Available\n") + "Validator Group: " + valGrBalance.balance.gold + "\n"
-			msgPiece2 := "Validator: " + valBalance.balance.gold + "\n"
+			var valGr validatorGr
+			var val validator
+			UpdateBalance(&valGr, msg)
+			UpdateBalance(&val, msg)
+			msgPiece1 := boldText("Gold Available\n") + "Validator Group: " + valGr.balance.gold + "\n"
+			msgPiece2 := "Validator: " + val.balance.gold + "\n"
 			msgPiece3 := "\nHow much would you like to lock?"
 			msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 			msg.ReplyMarkup = lockGoldKeyboard
 		case "exchange":
-			valGrBalance := valGrGetBalance(msg)
-			valBalance := valGetBalance(msg)
-			msgPiece1 := boldText("USD Available\n") + "Validator Group: " + valGrBalance.balance.usd + "\n"
-			msgPiece2 := "Validator: " + valBalance.balance.usd + "\n"
+			var valGr validatorGr
+			var val validator
+			UpdateBalance(&valGr, msg)
+			UpdateBalance(&val, msg)
+			msgPiece1 := boldText("USD Available\n") + "Validator Group: " + valGr.balance.usd + "\n"
+			msgPiece2 := "Validator: " + val.balance.usd + "\n"
 			msgPiece3 := "\nHow much would you like to exchange?\n"
 			msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 			msg.ReplyMarkup = exchangeUsdKeyboard
 		case "vote":
-			valGrBalance := valGrGetBalance(msg)
-			valBalance := valGetBalance(msg)
-			if valGrBalance.balance.nonVoting == "" && valBalance.balance.nonVoting == "" {
+			var valGr validatorGr
+			var val validator
+			UpdateBalance(&valGr, msg)
+			UpdateBalance(&val, msg)
+			if valGr.balance.nonVoting == "" && val.balance.nonVoting == "" {
 				msg.Text = "You have no non-voting lockedGold available"
 			} else {
-				msgPiece1 := boldText("Non-voting Locked Gold Available\n") + "Validator Group: " + valGrBalance.balance.nonVoting + "\n"
-				msgPiece2 := "Validator: " + valBalance.balance.nonVoting + "\n"
+				msgPiece1 := boldText("Non-voting Locked Gold Available\n") + "Validator Group: " + valGr.balance.nonVoting + "\n"
+				msgPiece2 := "Validator: " + val.balance.nonVoting + "\n"
 				msgPiece3 := "\nHow much would you like to cast?\n"
 				msg.Text = msgPiece1 + msgPiece2 + msgPiece3
 				msg.ReplyMarkup = electionVoteKeyboard
@@ -268,17 +282,7 @@ func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, string) {
 	return output, msg.Text
 }
 
-func valGrGetBalance(msg tgbotapi.MessageConfig) ValidatorGr {
-	var valGr ValidatorGr
-	return valGr.getBalance(msg)
-}
-
-func valGetBalance(msg tgbotapi.MessageConfig) Validator {
-	var val Validator
-	return val.getBalance(msg)
-}
-
-func (v *Validator) getBalance(msg tgbotapi.MessageConfig) Validator {
+func (v *validator) getBalance(msg tgbotapi.MessageConfig) {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
 	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
 	gold := cmd.AmountAvailable(target, "gold")
@@ -291,14 +295,16 @@ func (v *Validator) getBalance(msg tgbotapi.MessageConfig) Validator {
 	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
 	total := cmd.AmountAvailable(target, "total")
 	totalVal := isZero(total, "totalVal")
-	res := Validator{balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotingLockedGoldVal, total: totalVal}}
-	return res
+	v.balance.gold = goldVal
+	v.balance.usd = usdVal
+	v.balance.lockedGold = lockedGoldVal
+	v.balance.nonVoting = nonVotingLockedGoldVal
+	v.balance.total = totalVal
 }
 
-func (vgr *ValidatorGr) getBalance(msg tgbotapi.MessageConfig) ValidatorGr {
+func (v *validatorGr) getBalance(msg tgbotapi.MessageConfig) {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-	// TO-DO extract the logic for checking if zero
 	gold := cmd.AmountAvailable(target, "gold")
 	goldVal := isZero(gold, "goldVal")
 	usd := cmd.AmountAvailable(target, "usd")
@@ -309,6 +315,13 @@ func (vgr *ValidatorGr) getBalance(msg tgbotapi.MessageConfig) ValidatorGr {
 	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
 	total := cmd.AmountAvailable(target, "total")
 	totalVal := isZero(total, "totalVal")
-	res := ValidatorGr{balance: Balance{gold: goldVal, usd: usdVal, lockedGold: lockedGoldVal, nonVoting: nonVotingLockedGoldVal, total: totalVal}}
-	return res
+	v.balance.gold = goldVal
+	v.balance.usd = usdVal
+	v.balance.lockedGold = lockedGoldVal
+	v.balance.nonVoting = nonVotingLockedGoldVal
+	v.balance.total = totalVal
+}
+
+func UpdateBalance(a action, msg tgbotapi.MessageConfig) {
+	a.getBalance(msg)
 }

@@ -15,15 +15,17 @@ func allLockedGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string
 		gold, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 		output := lockGold(bot, msg, gold, "all", role)
 		botSendMsg(bot, msg, output)
-		valGrBalance := valGrGetBalance(msg)
-		msgPiece := `gold: ` + valGrBalance.balance.gold + "\n" + `lockedGold: ` + valGrBalance.balance.lockedGold
+		var valGr validatorGr
+		UpdateBalance(&valGr, msg)
+		msgPiece := `gold: ` + valGr.balance.gold + "\n" + `lockedGold: ` + valGr.balance.lockedGold
 		msg.Text = boldText("Validator Group Balance After Locking") + "\n\n" + msgPiece
 	} else if role == "validator" {
 		gold, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
 		output := lockGold(bot, msg, gold, "all", role)
 		botSendMsg(bot, msg, output)
-		valBalance := valGetBalance(msg)
-		msgPiece := `gold: ` + valBalance.balance.gold + "\n" + `lockedGold: ` + valBalance.balance.lockedGold
+		var val validator
+		UpdateBalance(&val, msg)
+		msgPiece := `gold: ` + val.balance.gold + "\n" + `lockedGold: ` + val.balance.lockedGold
 		msg.Text = boldText("Validator Balance After Locking") + "\n\n" + msgPiece
 	}
 	return msg.Text
