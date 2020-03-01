@@ -36,8 +36,8 @@ var mainKeyboard = tgbotapi.NewReplyKeyboard(
 
 var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAll"),
-		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAll"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrLockGold"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valLockGold"),
 	),
 	// tgbotapi.NewInlineKeyboardRow(
 	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
@@ -73,6 +73,9 @@ var electionVoteKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 
 type action interface {
 	getBalance(msg tgbotapi.MessageConfig)
+	lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
+	// TO-DO: exchange
+	// TO-DO: vote
 }
 
 type balance struct {
@@ -91,6 +94,7 @@ type validatorGr struct {
 	balance
 }
 
+// Run instantiates the bot
 func Run() {
 	botToken := os.Getenv("BOT_TOKEN")
 	bot, err := tgbotapi.NewBotAPI(botToken)
@@ -126,11 +130,21 @@ func Run() {
 			msg := tgbotapi.NewMessage(chatID, "")
 			msg.ParseMode = "Markdown"
 			switch data {
-			case "valGrAll":
-				msg.Text = allLockedGold(bot, msg, "group")
+			case "valGrLockGold":
+				var valGr validatorGr
+				lockGoldRun(&valGr, bot, msg)
+				// update balance after locking
+				UpdateBalance(&valGr, msg)
+				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `lockedGold: ` + valGr.balance.lockedGold
+				msg.Text = boldText("Validator Group Balance After Locking") + "\n\n" + msgPiece
 				break
-			case "valAll":
-				msg.Text = allLockedGold(bot, msg, "validator")
+			case "valLockGold":
+				var val validator
+				lockGoldRun(&val, bot, msg)
+				// update balance after locking
+				UpdateBalance(&val, msg)
+				msgPiece := `gold: ` + val.balance.gold + "\n" + `lockedGold: ` + val.balance.lockedGold
+				msg.Text = boldText("Validator Balance After Locking") + "\n\n" + msgPiece
 				break
 			case "valAmount":
 				msg.Text = "Locking a specific amount from validator was requested"
@@ -221,6 +235,7 @@ func Run() {
 			words := cmd.ParseCmdOutput(command, "string", "score: (\\d.\\d*)", 1)
 			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
 		case "lockgold":
+			// update balance before locking
 			var valGr validatorGr
 			var val validator
 			UpdateBalance(&valGr, msg)
@@ -280,48 +295,4 @@ func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, string) {
 		}
 	}
 	return output, msg.Text
-}
-
-func (v *validator) getBalance(msg tgbotapi.MessageConfig) {
-	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
-	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
-	gold := cmd.ParseAmount(target, "gold")
-	goldVal := isZero(gold, "goldVal")
-	usd := cmd.ParseAmount(target, "usd")
-	usdVal := isZero(usd, "usdVal")
-	lockedGold := cmd.ParseAmount(target, "lockedGold")
-	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
-	nonVotingLockedGold := cmd.ParseAmount(target1, "nonVotingLockedGold")
-	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
-	total := cmd.ParseAmount(target, "total")
-	totalVal := isZero(total, "totalVal")
-	v.balance.gold = goldVal
-	v.balance.usd = usdVal
-	v.balance.lockedGold = lockedGoldVal
-	v.balance.nonVoting = nonVotingLockedGoldVal
-	v.balance.total = totalVal
-}
-
-func (v *validatorGr) getBalance(msg tgbotapi.MessageConfig) {
-	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-	gold := cmd.ParseAmount(target, "gold")
-	goldVal := isZero(gold, "goldVal")
-	usd := cmd.ParseAmount(target, "usd")
-	usdVal := isZero(usd, "usdVal")
-	lockedGold := cmd.ParseAmount(target, "lockedGold")
-	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
-	nonVotingLockedGold := cmd.ParseAmount(target1, "nonVotingLockedGold")
-	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
-	total := cmd.ParseAmount(target, "total")
-	totalVal := isZero(total, "totalVal")
-	v.balance.gold = goldVal
-	v.balance.usd = usdVal
-	v.balance.lockedGold = lockedGoldVal
-	v.balance.nonVoting = nonVotingLockedGoldVal
-	v.balance.total = totalVal
-}
-
-func UpdateBalance(a action, msg tgbotapi.MessageConfig) {
-	a.getBalance(msg)
 }
