@@ -33,7 +33,7 @@ func allLockedGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string
 
 // lockGold locks a specific amount of gold available
 func lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, amount string, role string) string {
-	amountGold := cmd.AmountAvailable(target, "gold")
+	amountGold := cmd.parseAmount(target, "gold")
 	switch amount {
 	case "all":
 		toLock := fmt.Sprintf("%v", amountGold)

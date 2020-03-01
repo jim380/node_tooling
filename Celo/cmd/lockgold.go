@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
 	// "strconv"
 	"github.com/shopspring/decimal"
 )
 
 // lockGold locks a specific amount of gold available
 func lockGold(target []byte, role string) {
-	amountGold := AmountAvailable(target, "gold")
+	amountGold := parseAmount(target, "gold")
 	message := "\nHow much would you like to lock?\n1) All\n2) A specific amount\n3) Move on"
 	fmt.Printf(message)
 	fmt.Printf("\n=> ")
@@ -59,10 +60,10 @@ func lockGoldAmount(amount string, role string) {
 	} else {
 		if role == "group" {
 			fmt.Println("\nLocking", toLock, "gold from validator group")
-			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + fmt.Sprintf("%f", toLock))
+			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + toLock.String())
 		} else if role == "validator" {
 			fmt.Println("\nLocking", toLock, "gold from validator")
-			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + fmt.Sprintf("%f", toLock))
+			ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value " + toLock.String())
 		}
 		// ExecuteCmd("celocli lockedgold:lock --from $CELO_VALIDATOR_ADDRESS --value 10000000000000000000000")
 	}

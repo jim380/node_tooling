@@ -10,7 +10,7 @@ import (
 )
 
 func UsdToGold(target []byte, role string) {
-	amountUsd := AmountAvailable(target, "usd")
+	amountUsd := parseAmount(target, "usd")
 	message := "\nHow much would you like to exchange?\n1) All\n2) A specific amount\n3) Move on"
 	fmt.Printf(message)
 	fmt.Printf("\n=> ")

@@ -285,15 +285,15 @@ func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, string) {
 func (v *validator) getBalance(msg tgbotapi.MessageConfig) {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
 	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_ADDRESS", msg)
-	gold := cmd.AmountAvailable(target, "gold")
+	gold := cmd.parseAmount(target, "gold")
 	goldVal := isZero(gold, "goldVal")
-	usd := cmd.AmountAvailable(target, "usd")
+	usd := cmd.parseAmount(target, "usd")
 	usdVal := isZero(usd, "usdVal")
-	lockedGold := cmd.AmountAvailable(target, "lockedGold")
+	lockedGold := cmd.parseAmount(target, "lockedGold")
 	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
-	nonVotingLockedGold := cmd.AmountAvailable(target1, "nonVotingLockedGold")
+	nonVotingLockedGold := cmd.parseAmount(target1, "nonVotingLockedGold")
 	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
-	total := cmd.AmountAvailable(target, "total")
+	total := cmd.parseAmount(target, "total")
 	totalVal := isZero(total, "totalVal")
 	v.balance.gold = goldVal
 	v.balance.usd = usdVal
@@ -305,15 +305,15 @@ func (v *validator) getBalance(msg tgbotapi.MessageConfig) {
 func (v *validatorGr) getBalance(msg tgbotapi.MessageConfig) {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
 	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-	gold := cmd.AmountAvailable(target, "gold")
+	gold := cmd.parseAmount(target, "gold")
 	goldVal := isZero(gold, "goldVal")
-	usd := cmd.AmountAvailable(target, "usd")
+	usd := cmd.parseAmount(target, "usd")
 	usdVal := isZero(usd, "usdVal")
-	lockedGold := cmd.AmountAvailable(target, "lockedGold")
+	lockedGold := cmd.parseAmount(target, "lockedGold")
 	lockedGoldVal := isZero(lockedGold, "lockedGoldVal")
-	nonVotingLockedGold := cmd.AmountAvailable(target1, "nonVotingLockedGold")
+	nonVotingLockedGold := cmd.parseAmount(target1, "nonVotingLockedGold")
 	nonVotingLockedGoldVal := isZero(nonVotingLockedGold, "nonVotingLockedGoldVal")
-	total := cmd.AmountAvailable(target, "total")
+	total := cmd.parseAmount(target, "total")
 	totalVal := isZero(total, "totalVal")
 	v.balance.gold = goldVal
 	v.balance.usd = usdVal
