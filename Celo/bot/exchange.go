@@ -54,7 +54,7 @@ func exchangeUSDRun(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role strin
 }
 
 func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, role string, perct uint) string {
-	amountUsd := cmd.parseAmount(target, "usd")
+	amountUsd := cmd.ParseAmount(target, "usd")
 	switch perct {
 	case 25:
 		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "4", role)
