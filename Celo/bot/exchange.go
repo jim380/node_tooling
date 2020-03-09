@@ -8,115 +8,84 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func exchangeUSDRun(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, role string, perct uint) string {
+func (v *validatorGr) exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, perct uint16) {
 	msg.ParseMode = "Markdown"
-	botSendMsg(bot, msg, boldText("Exchange of all gold from "+role+" was requested"))
-	if role == "group" {
-		usd, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_ADDRESS", msg)
-		if perct == 100 {
-			output := usdToGold(bot, msg, usd, role, 100)
-			botSendMsg(bot, msg, output)
-		} else if perct == 50 {
-			output := usdToGold(bot, msg, usd, role, 50)
-			botSendMsg(bot, msg, output)
-		} else if perct == 25 {
-			output := usdToGold(bot, msg, usd, role, 25)
-			botSendMsg(bot, msg, output)
-		} else if perct == 75 {
-			output := usdToGold(bot, msg, usd, role, 75)
-			botSendMsg(bot, msg, output)
-		}
-		var valGr validatorGr
-		UpdateBalance(&valGr, msg)
-		msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
-		msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
-	} else if role == "validator" {
-		usd, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_ADDRESS", msg)
-		if perct == 100 {
-			output := usdToGold(bot, msg, usd, role, 100)
-			botSendMsg(bot, msg, output)
-		} else if perct == 50 {
-			output := usdToGold(bot, msg, usd, role, 50)
-			botSendMsg(bot, msg, output)
-		} else if perct == 25 {
-			output := usdToGold(bot, msg, usd, role, 25)
-			botSendMsg(bot, msg, output)
-		} else if perct == 75 {
-			output := usdToGold(bot, msg, usd, role, 75)
-			botSendMsg(bot, msg, output)
-		}
-		var val validator
-		UpdateBalance(&val, msg)
-		msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
-		msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
+	botSendMsg(bot, msg, boldText("Exchange USD to Gold from validator group was requested"))
+	usdAvailable, _ := decimal.NewFromString(v.usd)
+	if perct == 100 {
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
+	} else if perct == 50 {
+		dividend, _ := decimal.NewFromString("2")
+		usdAvailable = usdAvailable.DivRound(dividend, 18)
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
+	} else if perct == 25 {
+		dividend, _ := decimal.NewFromString("4")
+		usdAvailable = usdAvailable.DivRound(dividend, 18)
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
+	} else if perct == 75 {
+		dividend, _ := decimal.NewFromString("1.333333")
+		usdAvailable = usdAvailable.DivRound(dividend, 18)
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
 	}
-	return msg.Text
 }
 
-func usdToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, target []byte, role string, perct uint) string {
-	amountUsd := cmd.ParseAmount(target, "usd")
-	switch perct {
-	case 25:
-		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "4", role)
-	case 50:
-		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "2", role)
-	case 75:
-		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "1.333333", role)
-	case 100:
-		msg.Text = usdToGoldValidate(bot, msg, amountUsd, "", role)
+func (v *validator) exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, perct uint16) {
+	msg.ParseMode = "Markdown"
+	botSendMsg(bot, msg, boldText("Exchange USD to Gold from validator was requested"))
+	usdAvailable, _ := decimal.NewFromString(v.usd)
+	if perct == 100 {
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
+	} else if perct == 50 {
+		dividend, _ := decimal.NewFromString("2")
+		usdAvailable = usdAvailable.DivRound(dividend, 18)
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
+	} else if perct == 25 {
+		dividend, _ := decimal.NewFromString("4")
+		usdAvailable = usdAvailable.DivRound(dividend, 18)
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
+	} else if perct == 75 {
+		dividend, _ := decimal.NewFromString("1.333333")
+		usdAvailable = usdAvailable.DivRound(dividend, 18)
+		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		botSendMsg(bot, msg, msg.Text)
 	}
-	return msg.Text
 }
 
-func usdToGoldValidate(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount interface{}, div string, role string) string {
-	if div == "" {
-		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
-		zeroValue, _ := decimal.NewFromString("0")
-		if amountUsdValue.Cmp(zeroValue) == 1 {
-			toExchange := amountUsdValue.String()
-			output := usdToGoldExecute(bot, msg, toExchange, role)
-			msg.Text = output
-		} else {
-			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
-		}
-	} else {
-		dividend, _ := decimal.NewFromString(div)
-		amountUsdValue, _ := decimal.NewFromString(fmt.Sprintf("%v", amount))
-		amountUsdValue = amountUsdValue.DivRound(dividend, 18)
-		zeroValue, _ := decimal.NewFromString("0")
-		if amountUsdValue.Cmp(zeroValue) == 1 {
-			toExchange := amountUsdValue.String()
-			output := usdToGoldExecute(bot, msg, toExchange, role)
-			msg.Text = output
-		} else {
-			msg.Text = warnText("Don't bite more than you can chew! You only have " + amountUsdValue.String() + " usd available")
-		}
-	}
-
-	return msg.Text
-}
-
-func usdToGoldExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount string, role string) string {
-	if role == "group" {
-		botSendMsg(bot, msg, boldText("Exchanging "+amount+" usd from validator group"))
-		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value "+amount, msg)
+func (v *validatorGr) exchangeCmdExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
+	zeroValue, _ := decimal.NewFromString("0")
+	if amount.Cmp(zeroValue) == 1 {
+		toExchange := amount.String()
+		botSendMsg(bot, msg, boldText("Exchanging "+toExchange+" usd from validator group"))
+		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value "+toExchange, msg)
 		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 		if outputParsed == nil {
-			msg.Text = successText("Success")
-		} else {
-			msg.Text = errText(fmt.Sprintf("%v", outputParsed))
+			return successText("Success")
 		}
-	} else if role == "validator" {
-		botSendMsg(bot, msg, boldText("Exchanging "+amount+" usd from validator"))
-		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value "+amount, msg)
+		return errText(fmt.Sprintf("%v", outputParsed))
+	}
+	return warnText("Don't bite more than you can chew! You only have " + amount.String() + " usd available")
+}
+
+func (v *validator) exchangeCmdExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
+	zeroValue, _ := decimal.NewFromString("0")
+	if amount.Cmp(zeroValue) == 1 {
+		toExchange := amount.String()
+		botSendMsg(bot, msg, boldText("Exchanging "+toExchange+" usd from validator"))
+		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value "+toExchange, msg)
 		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 		if outputParsed == nil {
-			msg.Text = successText("Success")
-		} else {
-			msg.Text = errText(fmt.Sprintf("%v", outputParsed))
+			return successText("Success")
 		}
+		return errText(fmt.Sprintf("%v", outputParsed))
 	}
-	return msg.Text
+	return warnText("Don't bite more than you can chew! You only have " + amount.String() + " usd available")
 }
 
 func getExchangeRate(msg tgbotapi.MessageConfig) string {
@@ -135,4 +104,8 @@ func getExchangeRate(msg tgbotapi.MessageConfig) string {
 	msgPiece1 := "1 cGLD = " + goldToUsdRatio.String() + " cUSD\n"
 	msgPiece2 := "1 cUSD = " + usdToGoldRatio.String() + " cGLD"
 	return msgPiece1 + msgPiece2
+}
+
+func exchangeUSDToGoldRun(p perform, bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, perct uint16) {
+	p.exchanegUSDToGold(bot, msg, perct)
 }

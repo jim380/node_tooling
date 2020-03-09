@@ -3,8 +3,8 @@ package util
 import "fmt"
 
 // TitlePrint prints out the titles
-func TitlePrint(action string, target string) {
-	switch action {
+func TitlePrint(perform string, target string) {
+	switch perform {
 	case "stop":
 		title := "Stopping node on"
 		fmt.Println("\n---------------------------------------------------")

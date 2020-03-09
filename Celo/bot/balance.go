@@ -45,6 +45,6 @@ func (v *validatorGr) getBalance(msg tgbotapi.MessageConfig) {
 	v.balance.total = totalVal
 }
 
-func UpdateBalance(a action, msg tgbotapi.MessageConfig) {
-	a.getBalance(msg)
+func UpdateBalance(p perform, msg tgbotapi.MessageConfig) {
+	p.getBalance(msg)
 }

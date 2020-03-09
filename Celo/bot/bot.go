@@ -71,10 +71,10 @@ var electionVoteKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	),
 )
 
-type action interface {
+type perform interface {
 	getBalance(msg tgbotapi.MessageConfig)
 	lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
-	// TO-DO: exchange
+	exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, perct uint16)
 	// TO-DO: vote
 }
 
@@ -132,17 +132,17 @@ func Run() {
 			switch data {
 			case "valGrLockGold":
 				var valGr validatorGr
+				UpdateBalance(&valGr, msg) // update balance before locking
 				lockGoldRun(&valGr, bot, msg)
-				// update balance after locking
-				UpdateBalance(&valGr, msg)
+				UpdateBalance(&valGr, msg) // update balance after locking
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `lockedGold: ` + valGr.balance.lockedGold
 				msg.Text = boldText("Validator Group Balance After Locking") + "\n\n" + msgPiece
 				break
 			case "valLockGold":
 				var val validator
+				UpdateBalance(&val, msg) // update balance before locking
 				lockGoldRun(&val, bot, msg)
-				// update balance after locking
-				UpdateBalance(&val, msg)
+				UpdateBalance(&val, msg) // update balance after locking
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `lockedGold: ` + val.balance.lockedGold
 				msg.Text = boldText("Validator Balance After Locking") + "\n\n" + msgPiece
 				break
@@ -153,28 +153,68 @@ func Run() {
 				msg.Text = "Locking a specific amount from validator group was requested"
 				break
 			case "valGrAllUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "group", 100)
+				var valGr validatorGr
+				UpdateBalance(&valGr, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&valGr, bot, msg, 100)
+				UpdateBalance(&valGr, msg) // update balance after exchange
+				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
+				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrHalfUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "group", 50)
+				var valGr validatorGr
+				UpdateBalance(&valGr, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&valGr, bot, msg, 50)
+				UpdateBalance(&valGr, msg) // update balance after exchange
+				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
+				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrOneForthUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "group", 25)
+				var valGr validatorGr
+				UpdateBalance(&valGr, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&valGr, bot, msg, 25)
+				UpdateBalance(&valGr, msg) // update balance after exchange
+				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
+				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrFourThirdsUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "group", 75)
+				var valGr validatorGr
+				UpdateBalance(&valGr, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&valGr, bot, msg, 75)
+				UpdateBalance(&valGr, msg) // update balance after exchange
+				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
+				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valAllUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "validator", 100)
+				var val validator
+				UpdateBalance(&val, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&val, bot, msg, 100)
+				UpdateBalance(&val, msg) // update balance after exchange
+				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
+				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valHalfUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "validator", 50)
+				var val validator
+				UpdateBalance(&val, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&val, bot, msg, 50)
+				UpdateBalance(&val, msg) // update balance after exchange
+				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
+				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valOneForthUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "validator", 25)
+				var val validator
+				UpdateBalance(&val, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&val, bot, msg, 25)
+				UpdateBalance(&val, msg) // update balance after exchange
+				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
+				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valFourThirdsUsd":
-				msg.Text = exchangeUSDRun(bot, msg, "validator", 75)
+				var val validator
+				UpdateBalance(&val, msg) // update balance before exchange
+				exchangeUSDToGoldRun(&val, bot, msg, 75)
+				UpdateBalance(&val, msg) // update balance after exchange
+				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
+				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrAllVote":
 				msg.Text = allVote(bot, msg, "group")
@@ -187,6 +227,7 @@ func Run() {
 				break
 			}
 
+			// send final message out
 			if _, err := bot.Send(msg); err != nil {
 				log.Panic(err)
 			}

@@ -54,6 +54,6 @@ func (v *validator) lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	}
 }
 
-func lockGoldRun(a action, bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
-	a.lockGold(bot, msg)
+func lockGoldRun(p perform, bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
+	p.lockGold(bot, msg)
 }
