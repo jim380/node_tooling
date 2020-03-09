@@ -66,8 +66,8 @@ var exchangeUsdKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 
 var electionVoteKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrAllVote"),
-		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valAllVote"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrVote"),
+		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valVote"),
 	),
 )
 
@@ -75,7 +75,7 @@ type perform interface {
 	getBalance(msg tgbotapi.MessageConfig)
 	lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
 	exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, perct uint16)
-	// TO-DO: vote
+	vote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
 }
 
 type balance struct {
@@ -216,11 +216,21 @@ func Run() {
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
-			case "valGrAllVote":
-				msg.Text = allVote(bot, msg, "group")
+			case "valGrVote":
+				var valGr validatorGr
+				UpdateBalance(&valGr, msg) // update balance before voting
+				voteRun(&valGr, bot, msg)
+				UpdateBalance(&valGr, msg) // update balance after voting
+				msgPiece := `Non-voting: ` + valGr.balance.nonVoting
+				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
-			case "valAllVote":
-				msg.Text = allVote(bot, msg, "validator")
+			case "valVote":
+				var val validator
+				UpdateBalance(&val, msg) // update balance before voting
+				voteRun(&val, bot, msg)
+				UpdateBalance(&val, msg) // update balance after voting
+				msgPiece := `Non-voting: ` + val.balance.nonVoting
+				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "cancel":
 				msg.Text = "Back to back menu"
