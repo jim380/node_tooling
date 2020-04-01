@@ -40,18 +40,21 @@ function main {
             echo -e "\nWhat version of Grafana would you like to install? Example: v6.4.2\nFind releases here: https://github.com/grafana/grafana/tags\n"
             read -p 'v' GR_VERSION
             installGrafana
+            exit 0
           ;;
 
           "2" | "Prometheus")
             echo -e "\nWhat version of Prometheus would you like to install? Example: v2.13.0\nFind releases here: https://github.com/prometheus/prometheus/tags\n"
             read -p 'v' PR_VERSION
             installPrometheus
+            exit 0
           ;;
 
           "3" | "Node Exporter")
             echo -e "\nWhat version of Node Exporter would you like to install? Example: v0.18.1\nFind releases here: https://github.com/prometheus/node_exporter/tags\n"
             read -p 'v' NE_VERSION
             installNodeExporter
+            exit 0
           ;;
 
           "4" | "All")
@@ -63,6 +66,7 @@ function main {
             installGrafana
             installPrometheus
             installNodeExporter
+            exit 0
           ;;
         
           *) 
@@ -111,7 +115,6 @@ function installGrafana {
         popd
         cd ~
         success
-        exit 0
     fi
 }
 
