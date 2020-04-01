@@ -101,7 +101,7 @@ function installGrafana {
             echo "-----------------------------------------"
             echo "               Remove Package            "
             echo "-----------------------------------------"
-            rm -rf $PACKAGE_GR
+            rm $PACKAGE_GR
             echo "-----------------------------------------"
             echo "                Start Server             "
             echo "-----------------------------------------"
@@ -144,7 +144,7 @@ function installPrometheus {
             echo "-----------------------------------------"
             echo "               Remove Package            "
             echo "-----------------------------------------"
-            rm -rf $PACKAGE_PR
+            rm $PACKAGE_PR
         popd
         success
     fi
@@ -179,7 +179,7 @@ function installNodeExporter {
             echo "-----------------------------------------"
             echo "               Remove Package            "
             echo "-----------------------------------------"
-            rm -rf $PACKAGE_NE
+            rm $PACKAGE_NE
         popd
         success
     fi
