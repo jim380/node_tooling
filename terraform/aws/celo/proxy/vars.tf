@@ -6,6 +6,10 @@ variable "AWS_SECRET_KEY" {
   default = ""
 }
 
+variable "CELO_IMAGE" {
+  default = "us.gcr.io/celo-testnet/celo-node:baklava"
+}
+
 variable "AWS_REGION" {
   default = "us-east-2"
 }
@@ -30,11 +34,3 @@ variable "INSTANCE_USERNAME" {
   default = "ubuntu"
 }
 
-variable "NODE_INSTANCE_MODEL" {
-  default = "t3.medium"
-}
-
-variable "NODE_INSTANCE_VOLUME" {
-  description = "EBS volume initiated on the node"
-  default     = 500 # 500 GB
-}
