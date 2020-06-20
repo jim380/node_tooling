@@ -18,8 +18,10 @@ Download Terraform [binary](https://www.terraform.io/downloads.html)  and instal
 
 ## Deployment
 ```
-$ terraform init # under ava/
+$ terraform init
 $ ssh-keygen -f terra # save a copy of the private key
+    # alternatively you can import an existing key
+$ terraform import aws_key_pair.main_key terra
 $ terraform validate # check syntax
 # terraform plan # dryrun
 $ terraform apply # deploy
