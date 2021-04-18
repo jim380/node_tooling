@@ -26,13 +26,13 @@ scrape_configs:
     static_configs:
     - targets: ['localhost:9090']
 
-  - job_name: 'cosmos'
+  - job_name: 'cosmos-node'
     static_configs:
     - targets: ["NODE_IP:26660"]
       labels:
         instance: 'cosmos'
 
-  - job_name: 'node'
+  - job_name: 'node-exporter'
     static_configs: 
     - targets: ["NODE_IP:9100"]
       labels:

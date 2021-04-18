@@ -8,7 +8,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ${PWD}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ${PWD}/prometheus/prometheus.yml.edited:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
     networks:
