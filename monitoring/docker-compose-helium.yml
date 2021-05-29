@@ -1,0 +1,48 @@
+version: "3.5"
+
+networks:
+  helium-monitoring:
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ${PWD}/prometheus/prometheus.yml.edited:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - helium-monitoring
+
+  # default login credentials: admin/admin
+  grafana:
+    image: grafana/grafana:latest
+    env_file: ./grafana/grafana.conf
+    container_name: grafana
+    restart: always
+    volumes:
+      - ${PWD}/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ${PWD}/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    ports:
+      - 3000:3000
+    networks:
+      - helium-monitoring
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    restart: always
+    ports:
+      - 9100:9100
+    networks:
+      - helium-monitoring
+
+  miner_exporter:
+    image: ghcr.io/tedder/miner_exporter:latest
+    container_name: helium_exporter
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "9825:9825"
