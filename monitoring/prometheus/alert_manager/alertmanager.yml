@@ -1,11 +1,58 @@
 global:
   resolve_timeout: 1m
 
+templates: 
+- 'templates/*'
+
 route:
-  receiver: 'gmail-notifications'
+  group_by: ['...']
+  group_wait: 0s
+  group_interval: 5m
+  repeat_interval: 1h
+  
+  routes:
+    - receiver: 'cosmos-monitoring'
+      group_by: ['...']
+
+  receiver: cosmos-monitoring
+
+inhibit_rules:
+- source_match:
+    severity: critical
+    alertname: 'DiskFull'
+  target_match_re:
+    alertname: '^DiskFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+- source_match:
+    severity: critical
+  source_match_re:
+    alertname: '^DiskFull.*H'
+  target_match:
+    severity: major
+  target_match_re:
+    alertname: '^DiskFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+- source_match:
+    severity: critical
+    alertname: 'InodeFull'
+  target_match_re:
+    alertname: '^InodeFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
+
+- source_match:
+    severity: critical
+  source_match_re:
+    alertname: '^InodeFull.*H'
+  target_match:
+    severity: major
+  target_match_re:
+    alertname: '^InodeFull.*H'
+  equal: ['job', 'instance', 'mountpoint']
 
 receivers:
-- name: 'gmail-notifications'
+- name: 'cosmos-monitoring'
   email_configs:
   - to: your_own@gmail.com
     from: your_own@gmail.com
@@ -13,4 +60,11 @@ receivers:
     auth_username: your_own@gmail.com
     auth_identity: your_own@gmail.com
     auth_password: your_gmail_app_password
+    html: '{{ template "mail.body" . }}'
+    headers:
+      Subject: '{{ template "mail.subject" . }}'
+    send_resolved: true
+
+  webhook_configs:
+  - url: 'http://alerta:8080/api/webhooks/prometheus'
     send_resolved: true

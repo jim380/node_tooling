@@ -1,7 +1,7 @@
 groups:
 - name: Cosmos Monitoring
   rules:
-  - alert: InstanceDown
+  - alert: InstanceTargetDown
     # Condition for alerting
     expr: up == 0
     for: 1m
@@ -15,10 +15,10 @@ groups:
 
   - alert: ExporterTargetDown
       expr: up != 1
-      for: 5m
+      for: 1m
       labels:
         severity: critical
-        service: exporter
+        service: node_exporter
       annotations:
         summary: 'ExporterTargetDown - {{ $labels.instance }} of job {{ $labels.job }}'
         description: 'Target {{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
@@ -98,7 +98,7 @@ groups:
       for: 5m
       labels:
         severity: major
-        service: cosmos
+        service: cosmos-monitoring
       annotations:
         summary: 'DegradedSyncing - {{ $labels.instance }} of job {{ $labels.job }}'
         description: 'Degraded syncing performance on {{ $labels.instance }} of job {{ $labels.job }}'
@@ -158,7 +158,7 @@ groups:
       for: 5m
       labels:
         severity: major
-        service: cosmos
+        service: cosmos-monitoring
       annotations:
         summary: 'TooFewPeers - {{ $labels.instance_hostname }}'
         description: 'P2P Peers on "{{ $labels.instance_hostname }}" is lower than 5'

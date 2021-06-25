@@ -1,5 +1,10 @@
 version: "3.5"
 
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  alerta_db: {}
+
 networks:
   cosmos-monitoring:
 
@@ -49,7 +54,7 @@ services:
       - 9093:9093
     volumes:
       - type: bind
-        source: ./prometheus/alertmanager
+        source: ./prometheus/alert_manager
         target: /etc/alertmanager
         read_only: true
     command: [
