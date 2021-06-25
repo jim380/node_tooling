@@ -1,0 +1,164 @@
+groups:
+- name: Cosmos Monitoring
+  rules:
+  - alert: InstanceDown
+    # Condition for alerting
+    expr: up == 0
+    for: 1m
+    # Annotation - additional informational labels to store more information
+    annotations:
+      title: 'Instance {{ $labels.instance }} down'
+      description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.'
+    # Labels - additional labels to be attached to the alert
+    labels:
+      severity: 'critical'
+
+  - alert: ExporterTargetDown
+      expr: up != 1
+      for: 5m
+      labels:
+        severity: critical
+        service: exporter
+      annotations:
+        summary: 'ExporterTargetDown - {{ $labels.instance }} of job {{ $labels.job }}'
+        description: 'Target {{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
+
+  - alert: NodeFilesystemReadonly
+      expr: node_filesystem_readonly{fstype!~"rootfs|nfs4"} > 0
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeFilesystemReadonly - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" is read only.'
+
+  - alert: NodeDiskFull4H
+      expr: predict_linear(node_filesystem_free_bytes{fstype!~"rootfs|nfs4|tmpfs"}[4h], 4 * 3600) < 0
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeDiskFull4H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of diskspace within 4 hours.'
+
+  - alert: NodeDiskFull1H
+      expr: predict_linear(node_filesystem_free_bytes{fstype!~"rootfs|nfs4|tmpfs"}[4h], 3600) < 0
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeDiskFull1H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of diskspace within 1 hour.'
+
+  - alert: NodeDiskFull
+      expr: node_filesystem_avail_bytes/node_filesystem_size_bytes < 0.01
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeDiskFull - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" out of diskspace (< 1% free).'
+
+  - alert: NodeInodeFull4H
+      expr: predict_linear(node_filesystem_files_free{fstype!~"rootfs|nfs4|tmpfs"}[4h], 4 * 3600) < 0
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeInodeFull4H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of inode numbers within 4 hours.'
+
+  - alert: NodeInodeFull1H
+      expr: predict_linear(node_filesystem_files_free{fstype!~"rootfs|nfs4|tmpfs"}[4h], 3600) < 0
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeInodeFull1H - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" will be out of inode numbers within 1 hour.'
+
+  - alert: NodeInodeFull
+      expr: node_filesystem_files_free/node_filesystem_files < 0.01
+      for: 5m
+      labels:
+        severity: critical
+        service: node_exporter
+      annotations:
+        summary: 'NodeInodeFull - {{ $labels.instance_hostname }} - {{ $labels.mountpoint }}'
+        description: 'Filesystem "{{ $labels.mountpoint }}" on instance "{{ $labels.instance_hostname }}" out of inodes (< 1% free).'
+
+  - alert: DegradedSyncing
+      expr: increase(tendermint_consensus_latest_block_height{job="cosmos"}[5m]) < 10
+      for: 5m
+      labels:
+        severity: major
+        service: cosmos
+      annotations:
+        summary: 'DegradedSyncing - {{ $labels.instance }} of job {{ $labels.job }}'
+        description: 'Degraded syncing performance on {{ $labels.instance }} of job {{ $labels.job }}'
+  
+  - alert: NodeOutOfMemory
+      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+      for: 2m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'Host out of memory (instance {{ $labels.instance_hostname }})'
+        description: 'Node memory is filling up < 10% left\n  VALUE = {{ $value }}\n LABELS: {{ $labels.instance_hostname }}'
+
+  - alert: NodeHighCPULoad
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+      for: 0m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'Host high CPU load instance {{ $labels.instance_hostname }}'
+        description: 'CPU load is > 80%\n  VALUE = {{ $value }}\n LABELS: {{ $labels.instance_hostname }}'
+
+  - alert: NodeTimeOutOfSync
+      expr: node_timex_sync_status{} != 1
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeTimeOutOfSync - {{ $labels.instance_hostname }}'
+        description: 'Time on instance "{{ $labels.instance_hostname }}" not in sync with NTP.'
+
+  - alert: NodeTextfileCollectorDown
+      expr: time() - node_textfile_mtime_seconds{} > 3000
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeTextfileCollectorDown - {{ $labels.instance_hostname }} - {{ $labels.file }}'
+        description: 'Prometheus node-exporter textfile collector for file "{{ $labels.file }}" on instance "{{ $labels.instance_hostname }}" is down.'
+
+  - alert: NodeTextfileScrapingError
+      expr: node_textfile_scrape_error != 0
+      for: 5m
+      labels:
+        severity: major
+        service: node_exporter
+      annotations:
+        summary: 'NodeTextfileScrapingError - {{ $labels.instance_hostname }}'
+        description: 'Prometheus node-exporter textfile collector scraping error on instance "{{ $labels.instance_hostname }}".'
+
+  - alert: TooFewPeers
+      expr: tendermint_p2p_peers{job="cosmos"} < 5
+      for: 5m
+      labels:
+        severity: major
+        service: cosmos
+      annotations:
+        summary: 'TooFewPeers - {{ $labels.instance_hostname }}'
+        description: 'P2P Peers on "{{ $labels.instance_hostname }}" is lower than 5'

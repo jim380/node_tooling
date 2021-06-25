@@ -9,11 +9,11 @@ alerting:
   alertmanagers:
   - static_configs:
     - targets:
-      # - alertmanager:9093
+      - alertmanager:9093
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
-  # - "first_rules.yml"
+  - "alerts/rules.yml"
   # - "second_rules.yml"
 
 # A scrape configuration containing exactly one endpoint to scrape:
@@ -30,10 +30,14 @@ scrape_configs:
     static_configs:
     - targets: ["NODE_IP:26660"]
       labels:
-        instance: 'cosmos'
+        # environment: mainnet
+        # role: sentry
+        instance: 'sentry'
 
   - job_name: 'node'
     static_configs: 
     - targets: ["NODE_IP:9100"]
       labels:
-        instance: 'cosmos'
+        # environment: mainnet
+        # role: node
+        instance: 'sentry'

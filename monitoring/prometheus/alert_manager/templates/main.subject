@@ -1,0 +1,1 @@
+[{{ .Status | toUpper }}]  {{ .CommonAnnotations.summary }}: {{ .CommonLabels.severity | toUpper }}

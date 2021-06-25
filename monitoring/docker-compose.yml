@@ -9,10 +9,15 @@ services:
     container_name: prometheus
     volumes:
       - ${PWD}/prometheus/prometheus.yml.edited:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
     ports:
       - 9090:9090
     networks:
       - cosmos-monitoring
+    restart: always
 
   # default login credentials: admin/admin
   grafana:
@@ -26,6 +31,7 @@ services:
       - 3000:3000
     networks:
       - cosmos-monitoring
+    restart: always
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -33,3 +39,58 @@ services:
       - 9100:9100
     networks:
       - cosmos-monitoring
+  
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    networks:
+      - cosmos-monitoring
+    ports:
+      - 9093:9093
+    volumes:
+      - type: bind
+        source: ./prometheus/alertmanager
+        target: /etc/alertmanager
+        read_only: true
+    command: [
+      '--config.file=/etc/alertmanager/alertmanager.yml',
+      '--log.level=debug',
+    ]
+    hostname: 'alertmanager'
+    restart: always
+   
+  alerta_db:
+    image: postgres:11
+    container_name: alerta_db
+    networks:
+     - cosmos-monitoring
+    volumes:
+      - type: volume
+        source: alerta_db
+        target: /var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: cosmos_monitoring
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    hostname: 'alerta_db'
+    restart: always
+
+  alerta:
+    image: alerta/alerta-web:latest
+    container_name: alerta
+    networks:
+     - cosmos-monitoring
+    ports:
+       - 8080:8080
+    depends_on:
+      - alerta_db
+    volumes:
+      - type: bind
+        source: ./alerta/alertad.conf
+        target: /app/alertad.conf
+        read_only: true
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@alerta_db:5432/monitoring
+      - PLUGINS=reject,blackout
+    hostname: 'alerta'
+    restart: always
