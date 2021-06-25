@@ -11,19 +11,14 @@
 
 2. Fill out the `email_configs:` section in `/prometheus/alert_manager/alertmanager.yml`
 
-3. Run the setup script to populate your server IP into `prometheus.yml`
-    ```
-    $ ./setup.sh
-    ```
+3. Tweak `docker-compose.yml` if need be
 
-4. Tweak `docker-compose.yml` if need be
-
-5. Start the Contrainers
+4. Start the Contrainers
     ```
     $ docker-compose up -d
     ```
 
-6. Stop the Containers
+5. Stop the Containers
     ```
     $ docker-compose down
     ```

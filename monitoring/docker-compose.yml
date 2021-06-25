@@ -13,7 +13,13 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ${PWD}/prometheus/prometheus.yml.edited:/etc/prometheus/prometheus.yml
+       - type: volume
+         source: prometheus_data
+         target: /prometheus
+       - type: bind
+         source: ./prometheus
+         target: /etc/prometheus
+         read_only: true 
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
