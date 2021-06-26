@@ -112,7 +112,7 @@ services:
   alertmanager-bot:
     profiles: ["alert"]
     command:
-      - '--alertmanager.url=NODE_IP:9093'
+      - '--alertmanager.url=http://NODE_IP:9093'
       - '--log.level=info'
       - '--store=bolt'
       - '--bolt.path=/data/bot.db'
