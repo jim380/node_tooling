@@ -52,19 +52,7 @@ inhibit_rules:
   equal: ['job', 'instance', 'mountpoint']
 
 receivers:
-- name: 'cosmos-monitoring'
-  email_configs:
-  - to: your_own@gmail.com
-    from: your_own@gmail.com
-    smarthost: smtp.gmail.com:587d
-    auth_username: your_own@gmail.com
-    auth_identity: your_own@gmail.com
-    auth_password: your_gmail_app_password
-    html: '{{ template "mail.body" . }}'
-    headers:
-      Subject: '{{ template "mail.subject" . }}'
-    send_resolved: true
-
+- name: 'alertmananger-bot'
   webhook_configs:
-  - url: 'http://alerta:8080/api/webhooks/prometheus'
-    send_resolved: true
+  - send_resolved: true
+    url: 'http://alertmanager-bot:8080'

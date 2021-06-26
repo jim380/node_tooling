@@ -92,7 +92,7 @@ services:
     networks:
      - cosmos-monitoring
     ports:
-       - 8080:8080
+       - 8083:8083
     depends_on:
       - alerta_db
     volumes:
@@ -105,3 +105,21 @@ services:
       - PLUGINS=reject,blackout
     hostname: 'alerta'
     restart: always
+  
+  alertmanager-bot:
+    command:
+      - '--alertmanager.url=NODE_IP:9093'
+      - '--log.level=info'
+      - '--store=bolt'
+      - '--bolt.path=/data/bot.db'
+    environment:
+      TELEGRAM_ADMIN: "USER_ID"
+      TELEGRAM_TOKEN: BOT_TOKEN
+    image: metalmatze/alertmanager-bot:0.4.3
+    networks:
+      - cosmos-monitoring
+    ports:
+      - 8080:8080
+    restart: always
+    volumes:
+      - ./data:/data
