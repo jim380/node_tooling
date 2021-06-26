@@ -13,9 +13,14 @@
 
 3. Tweak `docker-compose.yml` if need be
 
-4. Start the Contrainers
+4. Start the contrainers
+    Deploy the monitoring stack (Grafana + Prometheus + Node Exporter)
     ```
     $ docker-compose up -d
+    ```
+    Deploy the monitor stack and the alerting stack (alert manager + alerta + telegram bot)
+    ```
+    $ docker-compose --profile alert up -d
     ```
 
 5. Stop the Containers

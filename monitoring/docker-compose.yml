@@ -52,6 +52,7 @@ services:
       - cosmos-monitoring
   
   alertmanager:
+    profiles: ["alert"]
     image: prom/alertmanager:latest
     container_name: alertmanager
     networks:
@@ -71,6 +72,7 @@ services:
     restart: always
    
   alerta_db:
+    profiles: ["alert"]
     image: postgres:11
     container_name: alerta_db
     networks:
@@ -87,6 +89,7 @@ services:
     restart: always
 
   alerta:
+    profiles: ["alert"]
     image: alerta/alerta-web:latest
     container_name: alerta
     networks:
@@ -107,6 +110,7 @@ services:
     restart: always
   
   alertmanager-bot:
+    profiles: ["alert"]
     command:
       - '--alertmanager.url=NODE_IP:9093'
       - '--log.level=info'
