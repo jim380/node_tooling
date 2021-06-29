@@ -11,10 +11,10 @@ route:
   repeat_interval: 1h
   
   routes:
-    - receiver: 'cosmos-monitoring'
+    - receiver: 'node-monitoring'
       group_by: ['...']
 
-  receiver: cosmos-monitoring
+  receiver: node-monitoring
 
 inhibit_rules:
 - source_match:
@@ -52,7 +52,7 @@ inhibit_rules:
   equal: ['job', 'instance', 'mountpoint']
 
 receivers:
-- name: 'cosmos-monitoring'
+- name: 'node-monitoring'
   webhook_configs:
   - send_resolved: true
     url: 'http://alertmanager-bot:8080'

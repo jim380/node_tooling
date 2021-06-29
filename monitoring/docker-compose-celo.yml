@@ -6,11 +6,10 @@ volumes:
   alerta_db: {}
 
 networks:
-  cosmos-monitoring:
+  celo-monitoring:
 
 services:
   prometheus:
-    profiles: ["prometheus", "monitor"]
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
@@ -28,12 +27,11 @@ services:
     ports:
       - 9090:9090
     networks:
-      - cosmos-monitoring
+      - celo-monitoring
     restart: always
 
   # default login credentials: admin/admin
   grafana:
-    profiles: ["grafana","monitor"]
     image: grafana/grafana:latest
     env_file: ./grafana/grafana.conf
     container_name: grafana
@@ -43,23 +41,22 @@ services:
     ports:
       - 3000:3000
     networks:
-      - cosmos-monitoring
+      - celo-monitoring
     restart: always
 
   node-exporter:
-    profiles: ["node_exporter","monitor"]
     image: prom/node-exporter:latest
     ports:
       - 9100:9100
     networks:
-      - cosmos-monitoring
+      - celo-monitoring
   
   alertmanager:
     profiles: ["alert"]
     image: prom/alertmanager:latest
     container_name: alertmanager
     networks:
-      - cosmos-monitoring
+      - celo-monitoring
     ports:
       - 9093:9093
     volumes:
@@ -79,7 +76,7 @@ services:
     image: postgres:11
     container_name: alerta_db
     networks:
-     - cosmos-monitoring
+     - celo-monitoring
     volumes:
       - type: volume
         source: alerta_db
@@ -96,7 +93,7 @@ services:
     image: alerta/alerta-web:latest
     container_name: alerta
     networks:
-     - cosmos-monitoring
+     - celo-monitoring
     ports:
        - 8083:8083
     depends_on:
@@ -124,7 +121,7 @@ services:
       TELEGRAM_TOKEN: BOT_TOKEN
     image: metalmatze/alertmanager-bot:0.4.3
     networks:
-      - cosmos-monitoring
+      - celo-monitoring
     ports:
       - 8080:8080
     restart: always
