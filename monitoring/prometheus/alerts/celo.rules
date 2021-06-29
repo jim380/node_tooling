@@ -1,7 +1,7 @@
 groups:
-  - name: Celo Monitoring
+  - name: Cosmos Monitoring
     rules:
-    - alert: ValidatorLowSigningRate
+    - alert: ValidatorLowSigningRate(97%)
       # Condition for alerting
       expr: (consensus_istanbul_blocks_signedbyus{instance="validator",job="celo"}/consensus_istanbul_blocks_elected{instance="validator",job="celo"})*100 < 97 
       for: 1m
@@ -13,7 +13,7 @@ groups:
       labels:
         severity: 'critical'
     
-    - alert: ValidatorLowSigningRate
+    - alert: ValidatorLowSigningRate(90%)
       # Condition for alerting
       expr: (consensus_istanbul_blocks_signedbyus{instance="validator",job="celo"}/consensus_istanbul_blocks_elected{instance="validator",job="celo"})*100 < 90
       for: 1m
@@ -21,6 +21,42 @@ groups:
       annotations:
         title: '{{ $labels.instance }} Signing Rate Dropped below 90%'
         description: '{{ $labels.instance }} signing rate has been consistently below 90% for more than 1 minute'
+      # Labels - additional labels to be attached to the alert
+      labels:
+        severity: 'critical'
+
+    - alert: ValidatorMissingBlocks
+      # Condition for alerting
+      expr: rate(consensus_istanbul_blocks_missedbyus{instance="validator",job="celo"}[1m]) != 0
+      # for: 1m
+      # Annotation - additional informational labels to store more information
+      annotations:
+        title: '{{ $labels.instance }} Missing Blocks'
+        description: '{{ $labels.instance }} missed some blocks'
+      # Labels - additional labels to be attached to the alert
+      labels:
+        severity: 'page'
+    
+    - alert: ValidatorMissingBlocksConsecutive
+      # Condition for alerting
+      expr: rate(consensus_istanbul_blocks_missedbyus{instance="validator",job="celo"}[1m]) != 0
+      for: 1m
+      # Annotation - additional informational labels to store more information
+      annotations:
+        title: '{{ $labels.instance }} Missing Blocks Consecutively'
+        description: '{{ $labels.instance }} has been missing blocks consecutively for 1 minute'
+      # Labels - additional labels to be attached to the alert
+      labels:
+        severity: 'critical'
+    
+    - alert: ValidatorDowntimeEvent
+      # Condition for alerting
+      expr: rate(consensus_istanbul_blocks_downtimeevent{instance="$instance",job="celo"}[1m]) != 0
+      # for: 1m
+      # Annotation - additional informational labels to store more information
+      annotations:
+        title: '{{ $labels.instance }} Downtime Event Occurred'
+        description: '{{ $labels.instance }} missed 12 blocks in a row'
       # Labels - additional labels to be attached to the alert
       labels:
         severity: 'critical'
