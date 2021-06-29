@@ -3,7 +3,7 @@ groups:
     rules:
     - alert: ValidatorLowSigningRate(97%)
       # Condition for alerting
-      expr: (consensus_istanbul_blocks_signedbyus{instance="validator",job="celo"}/consensus_istanbul_blocks_elected{instance="validator",job="celo"})*100 < 97 
+      expr: (consensus_istanbul_blocks_signedbyus{instance="Validator",job="celo"}/consensus_istanbul_blocks_elected{instance="Validator",job="celo"})*100 < 97 
       for: 1m
       # Annotation - additional informational labels to store more information
       annotations:
@@ -15,7 +15,7 @@ groups:
     
     - alert: ValidatorLowSigningRate(90%)
       # Condition for alerting
-      expr: (consensus_istanbul_blocks_signedbyus{instance="validator",job="celo"}/consensus_istanbul_blocks_elected{instance="validator",job="celo"})*100 < 90
+      expr: (consensus_istanbul_blocks_signedbyus{instance="Validator",job="celo"}/consensus_istanbul_blocks_elected{instance="Validator",job="celo"})*100 < 90
       for: 1m
       # Annotation - additional informational labels to store more information
       annotations:
@@ -27,7 +27,7 @@ groups:
 
     - alert: ValidatorMissingBlocks
       # Condition for alerting
-      expr: rate(consensus_istanbul_blocks_missedbyus{instance="validator",job="celo"}[1m]) != 0
+      expr: rate(consensus_istanbul_blocks_missedbyus{instance="Validator",job="celo"}[1m]) != 0
       # for: 1m
       # Annotation - additional informational labels to store more information
       annotations:
@@ -39,7 +39,7 @@ groups:
     
     - alert: ValidatorMissingBlocksConsecutive
       # Condition for alerting
-      expr: rate(consensus_istanbul_blocks_missedbyus{instance="validator",job="celo"}[1m]) != 0
+      expr: rate(consensus_istanbul_blocks_missedbyus{instance="Validator",job="celo"}[1m]) != 0
       for: 1m
       # Annotation - additional informational labels to store more information
       annotations:
@@ -51,7 +51,7 @@ groups:
     
     - alert: ValidatorDowntimeEvent
       # Condition for alerting
-      expr: rate(consensus_istanbul_blocks_downtimeevent{instance="$instance",job="celo"}[1m]) != 0
+      expr: rate(consensus_istanbul_blocks_downtimeevent{instance="Validator",job="celo"}[1m]) != 0
       # for: 1m
       # Annotation - additional informational labels to store more information
       annotations:
