@@ -9,7 +9,7 @@
 
 1. Create a `prometheus.yml` under `/prometheus`. Some sample yaml files are included in the folder. Remember to replace `NODE_IP` with your server IP
 
-2. (**If alerts are needed**) Fill in `NODE_IP:9093`, `TELEGRAM_ADMIN:` and `TELEGRAM_TOKEN` under section `alertmanager-bot:` in `docker-compose.yml`. Tweak the rest of `docker-compose.yml` as you see fir
+2. (**If alerts are needed**) Fill in `NODE_IP:9093`, `TELEGRAM_ADMIN:` and `TELEGRAM_TOKEN` under section `alertmanager-bot:` in `docker-compose.yml`. Tweak the rest of `docker-compose.yml` as you see fit
 
 3. (**If alerts are needed**) Fill in `http://NODE_IP:8080` under section `webhook_configs:` in `/prometheus/alert_manager/alertmanager.yml` 
 
@@ -20,7 +20,7 @@
     ```
     Deploy the monitor stack and the alerting stack (alert manager + alerta + telegram bot)
     ```
-    $ docker-compose --profile monitor alert up -d
+    $ docker-compose --profile monitor --profile alert up -d
     ```
 
 5. Stop the Containers
