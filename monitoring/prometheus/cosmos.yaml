@@ -36,7 +36,7 @@ scrape_configs:
 
   - job_name: 'node'
     static_configs: 
-    - targets: ["NODE_IP:9100"]
+    - targets: ["PROXY_HOST"]
       labels:
         # environment: mainnet
         # role: node

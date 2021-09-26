@@ -3,14 +3,13 @@ version: "3.5"
 volumes:
   prometheus_data: {}
   grafana_data: {}
-  alerta_db: {}
 
 networks:
   cosmos-monitoring:
 
 services:
   prometheus:
-    profiles: ["prometheus", "monitor"]
+    profiles: ["monitor"]
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
@@ -25,23 +24,6 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.enable-lifecycle'
-    ports:
-      - 9090:9090
-    networks:
-      - cosmos-monitoring
-    restart: always
-
-  # default login credentials: admin/admin
-  grafana:
-    profiles: ["grafana","monitor"]
-    image: grafana/grafana:latest
-    env_file: ./grafana/grafana.conf
-    container_name: grafana
-    volumes:
-      - ${PWD}/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ${PWD}/grafana/dashboards:/etc/grafana/provisioning/dashboards
-    ports:
-      - 3000:3000
     networks:
       - cosmos-monitoring
     restart: always
@@ -49,19 +31,16 @@ services:
   node-exporter:
     profiles: ["node_exporter","monitor"]
     image: prom/node-exporter:latest
-    ports:
-      - 9100:9100
+    container_name: node-exporter
     networks:
       - cosmos-monitoring
   
   alertmanager:
-    profiles: ["alert"]
+    profiles: ["monitor"]
     image: prom/alertmanager:latest
     container_name: alertmanager
     networks:
       - cosmos-monitoring
-    ports:
-      - 9093:9093
     volumes:
       - type: bind
         source: ./prometheus/alert_manager
@@ -73,49 +52,11 @@ services:
     ]
     hostname: 'alertmanager'
     restart: always
-   
-  alerta_db:
-    profiles: ["alert"]
-    image: postgres:11
-    container_name: alerta_db
-    networks:
-     - cosmos-monitoring
-    volumes:
-      - type: volume
-        source: alerta_db
-        target: /var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: cosmos_monitoring
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-    hostname: 'alerta_db'
-    restart: always
-
-  alerta:
-    profiles: ["alert"]
-    image: alerta/alerta-web:latest
-    container_name: alerta
-    networks:
-     - cosmos-monitoring
-    ports:
-       - 8083:8083
-    depends_on:
-      - alerta_db
-    volumes:
-      - type: bind
-        source: ./alerta/alertad.conf
-        target: /app/alertad.conf
-        read_only: true
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@alerta_db:5432/monitoring
-      - PLUGINS=reject,blackout
-    hostname: 'alerta'
-    restart: always
   
   alertmanager-bot:
-    profiles: ["alert"]
+    profiles: ["bot"]
     command:
-      - '--alertmanager.url=http://NODE_IP:9093'
+      - '--alertmanager.url=PROXY_HOST'
       - '--log.level=info'
       - '--store=bolt'
       - '--bolt.path=/data/bot.db'
@@ -130,3 +71,37 @@ services:
     restart: always
     volumes:
       - ./data:/data
+
+  nginx-proxy-manager:
+    profiles: ["proxy"]
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    environment:
+      DB_MYSQL_HOST: "db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "npm"
+      DB_MYSQL_NAME: "npm"
+    networks:
+      - cosmos-monitoring
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+  mariadb:
+    profiles: ["proxy"]
+    image: 'jc21/mariadb-aria:10.4.15'
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    networks:
+      - cosmos-monitoring
+    volumes:
+      - ./data/mysql:/var/lib/mysql
