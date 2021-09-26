@@ -72,7 +72,7 @@ services:
     volumes:
       - ./data:/data
 
-  nginx-proxy-manager:
+  app:
     profiles: ["proxy"]
     image: 'jc21/nginx-proxy-manager:latest'
     container_name: nginx-proxy-manager
@@ -92,7 +92,7 @@ services:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
 
-  mariadb:
+  db:
     profiles: ["proxy"]
     image: 'jc21/mariadb-aria:10.4.15'
     container_name: mariadb

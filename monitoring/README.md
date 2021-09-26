@@ -16,11 +16,11 @@
 4. Start the contrainers
     Deploy the monitoring stack (Prometheus + Node Exporter + Alert Manager) and proxy (Nginx + MariaDB) stack
     ```
-    $ docker-compose up -d --profile monitor --profile proxy 
+    $ docker-compose --profile monitor --profile proxy up -d
     ```
     Deploy the monitoring stack, the proxy stack and the telegram bot 
     ```
-    $ docker-compose up -d --profile monitor --profile proxy --profile bot
+    $ docker-compose --profile monitor --profile proxy --profile bot up -d
     ```
     Deploy individual containers 
     ```
