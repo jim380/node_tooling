@@ -2,7 +2,7 @@ version: "3.5"
 
 volumes:
   prometheus_data: {}
-  grafana_data: {}
+  portainer_data: {}
 
 networks:
   cosmos-monitoring:
@@ -75,6 +75,7 @@ services:
   app:
     profiles: ["proxy"]
     image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
     container_name: nginx-proxy-manager
     ports:
       - '80:80'
@@ -95,6 +96,7 @@ services:
   db:
     profiles: ["proxy"]
     image: 'jc21/mariadb-aria:10.4.15'
+    restart: unless-stopped
     container_name: mariadb
     environment:
       MYSQL_ROOT_PASSWORD: 'npm'
@@ -105,3 +107,16 @@ services:
       - cosmos-monitoring
     volumes:
       - ./data/mysql:/var/lib/mysql
+
+  portainer:
+    profiles: ["monitor"]
+    image: portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    networks:
+      - cosmos-monitoring
+    ports:
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data

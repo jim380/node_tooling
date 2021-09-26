@@ -14,7 +14,7 @@
 3. (**If alerts are needed**) Fill in `http://NODE_IP:8080` under section `webhook_configs:` in `/prometheus/alert_manager/alertmanager.yml` 
 
 4. Start the contrainers
-    Deploy the monitoring stack (Prometheus + Node Exporter + Alert Manager) and proxy (Nginx + MariaDB) stack
+    Deploy the monitoring stack (Prometheus + Node Exporter + Alert Manager + Portainer) and proxy (Nginx + MariaDB) stack
     ```
     $ docker-compose --profile monitor --profile proxy up -d
     ```
@@ -24,7 +24,7 @@
     ```
     Deploy individual containers 
     ```
-    $ docker-compose up -d prometheus node-exporter alertmanager nginx-proxy-manager mariadb
+    $ docker-compose up -d prometheus node-exporter alertmanager nginx-proxy-manager mariadb portainer
     ```
 
 5. Stop the Containers
