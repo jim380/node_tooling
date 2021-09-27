@@ -56,7 +56,7 @@ services:
   alertmanager-bot:
     profiles: ["bot"]
     command:
-      - '--alertmanager.url=PROXY_HOST'
+      - '--alertmanager.url=http://PROXY_HOST'
       - '--log.level=info'
       - '--store=bolt'
       - '--bolt.path=/data/bot.db'
