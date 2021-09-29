@@ -109,6 +109,7 @@ services:
   portainer:
     profiles: ["monitor"]
     image: portainer/portainer-ce
+    container_name: portainer
     command: -H unix:///var/run/docker.sock
     restart: always
     networks:
@@ -118,3 +119,17 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+  
+  portainer-agent:
+    profiles: ["monitor"]
+    image: portainer/agent:latest
+    container_name: portainer-agent
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    networks:
+      - cosmos-monitoring
+    ports:
+      - 9001:9001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
