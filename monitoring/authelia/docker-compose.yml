@@ -1,0 +1,25 @@
+version: '3.3'
+  
+services:
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    volumes:
+      - ~/Documents/authelia:/config
+    restart: unless-stopped
+    healthcheck:
+      ## In production the healthcheck section should be commented.
+      disable: true
+    environment:
+      - America/Los_Angeles
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    volumes:
+      - ~/Documents/authelia/redis:/data
+    # expose:
+    #   - 6379
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles

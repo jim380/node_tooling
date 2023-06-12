@@ -56,7 +56,7 @@ services:
   alertmanager-bot:
     profiles: ["bot"]
     command:
-      - '--alertmanager.url=http://PROXY_HOST'
+      - '--alertmanager.url=http://URL_ALERT'
       - '--log.level=info'
       - '--store=bolt'
       - '--bolt.path=/data/bot.db'
@@ -68,11 +68,11 @@ services:
       - cosmos-monitoring
     restart: always
     volumes:
-      - ./data:/data
+      - ~/Documents/monitoring-stack/alertmanager-bot:/data
 
   app:
     profiles: ["proxy"]
-    image: 'jc21/nginx-proxy-manager:latest'
+    image: 'jc21/nginx-proxy-manager:2.9.18'
     restart: unless-stopped
     container_name: nginx-proxy-manager
     ports:
@@ -88,8 +88,9 @@ services:
     networks:
       - cosmos-monitoring
     volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
+      - ~/Documents/monitoring-stack/ngm:/data
+      - ~/Documents/monitoring-stack/ngm/letsencrypt:/etc/letsencrypt
+      - ~/Documents/monitoring-stack/ngm/nginx/snippets:/snippets:ro
 
   db:
     profiles: ["proxy"]
@@ -104,7 +105,7 @@ services:
     networks:
       - cosmos-monitoring
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ~/Documents/monitoring-stack/mysql:/var/lib/mysql
 
   portainer:
     profiles: ["monitor"]
