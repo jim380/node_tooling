@@ -77,13 +77,13 @@ groups:
         description: 'Filesystem "{{ $labels.mountpoint }}" on "{{ $labels.instance }}" out of inodes (< 1% free).'
 
     - alert: DegradedSyncing
-      expr: increase(tendermint_consensus_latest_block_height{job="cosmos"}[5m]) < 10
+      expr: rate(tendermint_consensus_latest_block_height{job="cosmos"}[5m]) < 0.1
       for: 5m
       labels:
         severity: major
         service: cosmos-monitoring
       annotations:
-        description: 'Degraded syncing performance - Job {{ $labels.job }} on {{ $labels.instance }}'
+        description: 'Degraded syncing on {{ $labels.instance }}'
   
     - alert: NodeOutOfMemory
       expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
@@ -138,3 +138,21 @@ groups:
         service: cosmos-monitoring
       annotations:
         description: 'P2P Peers on {{ $labels.instance }} is lower than threshold (5)'
+    
+    - alert: NodeStall
+      expr: (tendermint_consensus_height{chain_id="$chain_id", instance="$instance"} == bool tendermint_consensus_latest_block_height{chain_id="$chain_id",instance="$instance"}) == 1
+      for: 5m
+      labels:
+        severity: major
+        service: cosmos-monitoring
+      annotations:
+        description: 'Syncing appears to be stalled on {{ $labels.instance }}'
+    
+    - alert: ChainHalt
+      expr: rate(tendermint_consensus_latest_block_height{job="cosmos"}[5m]) == 0
+      for: 5m
+      labels:
+        severity: major
+        service: cosmos-monitoring
+      annotations:
+        description: 'Chain appears to be halted'

@@ -8,6 +8,33 @@ networks:
   cosmos-monitoring:
 
 services:
+  node:
+    profiles: ["node"]
+    image: gaiad:v5.0.2
+    container_name: cosmos
+    volumes:
+      - $HOME/.gaia:/root/.gaia
+    ports:
+      - '127.0.0.1:26657:26657'
+      - '1317:1317'
+      - '9093:9093'
+    command: >
+      /bin/sh -c 'gaiad start'
+    networks:
+      - cosmos-monitoring
+    restart: unless-stopped
+
+  cendermint:
+    profiles: ["monitor"]
+    image: ghcr.io/jim380/cendermint:develop
+    container_name: cendermint
+    command: >
+      /bin/sh -c 'Cendermint run'
+    network_mode: host
+    env_file:
+      - ./Cendermint/config.env
+    restart: unless-stopped
+    
   prometheus:
     profiles: ["monitor"]
     image: prom/prometheus:latest
@@ -29,11 +56,21 @@ services:
     restart: always
 
   node-exporter:
-    profiles: ["node_exporter","monitor"]
+    profiles: ["monitor"]
     image: prom/node-exporter:latest
     container_name: node-exporter
     networks:
       - cosmos-monitoring
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - --collector.filesystem.ignored-mount-points
+      - ^/(sys|proc|dev|run|boot|host|etc)($$|/)
   
   alertmanager:
     profiles: ["monitor"]

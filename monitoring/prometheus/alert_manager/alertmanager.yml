@@ -55,4 +55,4 @@ receivers:
 - name: 'node-monitoring'
   webhook_configs:
   - send_resolved: true
-    url: 'http://PROXY_HOST'
+    url: 'http://URL_BOT'
