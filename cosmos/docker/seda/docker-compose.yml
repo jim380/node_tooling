@@ -1,0 +1,49 @@
+version: "3.5"
+
+networks:
+  cosmos:
+
+services:
+  init-node:
+    image: $NODE_IMG
+    container_name: node-init
+    volumes:
+      - $NODE_HOME_DIR_LOCAL:$NODE_HOME_DIR_CONTAINER
+    command: >
+      $DAEMON init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME_DIR_CONTAINER
+
+  reset-node:
+    image: $NODE_IMG
+    container_name: node-reset
+    volumes:
+      - $NODE_HOME_DIR_LOCAL:$NODE_HOME_DIR_CONTAINER
+    command: >
+      $DAEMON tendermint unsafe-reset-all $NODE_MONIKER --home $NODE_HOME_DIR_CONTAINER
+
+  config-node:
+    image: $NODE_IMG
+    container_name: node-config
+    volumes:
+      - $NODE_HOME_DIR_LOCAL:$NODE_HOME_DIR_CONTAINER
+    command: >
+      sed -E -i 's/seeds = \".*\"/seeds = \"xxx\"/' --home $NODE_HOME_DIR_CONTAINER/config/config.toml
+
+  node:
+    #profiles: ["node"]
+    image: $NODE_IMG
+    container_name: $NODE_CONTAINER_NAME
+    #depends_on:
+    #- init-node
+    volumes:
+      - $NODE_HOME_DIR_LOCAL:$NODE_HOME_DIR_CONTAINER
+    ports:
+      - "$P2P_PORT:$P2P_PORT"
+      - "$RPC_PORT:$RPC_PORT"
+      - "$API_PORT:$API_PORT"
+      - "$GRPC_PORT:$GRPC_PORT"
+    command: >
+      $DAEMON start
+    networks:
+      - cosmos
+    restart: unless-stopped
+    stop_grace_period: 10s
