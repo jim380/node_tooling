@@ -7,23 +7,9 @@ volumes:
 networks:
   cosmos-monitoring:
 
+# no ports are exposed by default for most services because
+# they should be accessed via a reverse proxy
 services:
-  node:
-    profiles: ["node"]
-    image: gaiad:v5.0.2
-    container_name: cosmos
-    volumes:
-      - $HOME/.gaia:/root/.gaia
-    ports:
-      - '127.0.0.1:26657:26657'
-      - '1317:1317'
-      - '9093:9093'
-    command: >
-      /bin/sh -c 'gaiad start'
-    networks:
-      - cosmos-monitoring
-    restart: unless-stopped
-
   cendermint:
     profiles: ["monitor"]
     image: ghcr.io/jim380/cendermint:develop
@@ -34,26 +20,26 @@ services:
     env_file:
       - ./Cendermint/config.env
     restart: unless-stopped
-    
+
   prometheus:
     profiles: ["monitor"]
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-       - type: volume
-         source: prometheus_data
-         target: /prometheus
-       - type: bind
-         source: ./prometheus
-         target: /etc/prometheus
-         read_only: true 
+      - type: volume
+        source: prometheus_data
+        target: /prometheus
+      - type: bind
+        source: ./prometheus
+        target: /etc/prometheus
+        read_only: true
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
     networks:
       - cosmos-monitoring
-    restart: always
+    restart: unless-stopped
 
   node-exporter:
     profiles: ["monitor"]
@@ -71,7 +57,40 @@ services:
       - "--path.rootfs=/rootfs"
       - --collector.filesystem.ignored-mount-points
       - ^/(sys|proc|dev|run|boot|host|etc)($$|/)
-  
+
+  loki:
+    profiles: ["logging"]
+    image: grafana/loki:latest
+    container_name: loki
+    volumes:
+      - ./loki/loki-docker-config.yaml:/etc/loki/config.yml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - cosmos-monitoring
+    restart: unless-stopped
+
+  promtail:
+    profiles: ["logging"]
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./loki/promtail-docker-config.yaml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    networks:
+      - cosmos-monitoring
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - cosmos-monitoring
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+
   alertmanager:
     profiles: ["monitor"]
     image: prom/alertmanager:latest
@@ -83,39 +102,37 @@ services:
         source: ./prometheus/alert_manager
         target: /etc/alertmanager
         read_only: true
-    command: [
-      '--config.file=/etc/alertmanager/alertmanager.yml',
-      '--log.level=debug',
-    ]
-    hostname: 'alertmanager'
-    restart: always
-  
+    command:
+      ["--config.file=/etc/alertmanager/alertmanager.yml", "--log.level=debug"]
+    hostname: "alertmanager"
+    restart: unless-stopped
+
   alertmanager-bot:
     profiles: ["bot"]
     command:
-      - '--alertmanager.url=http://URL_ALERT'
-      - '--log.level=info'
-      - '--store=bolt'
-      - '--bolt.path=/data/bot.db'
+      - "--alertmanager.url=http://URL_ALERT"
+      - "--log.level=info"
+      - "--store=bolt"
+      - "--bolt.path=/data/bot.db"
     environment:
       TELEGRAM_ADMIN: "USER_ID"
       TELEGRAM_TOKEN: BOT_TOKEN
     image: metalmatze/alertmanager-bot:0.4.3
     networks:
       - cosmos-monitoring
-    restart: always
+    restart: unless-stopped
     volumes:
       - ~/Documents/monitoring-stack/alertmanager-bot:/data
 
   app:
     profiles: ["proxy"]
-    image: 'jc21/nginx-proxy-manager:2.9.18'
+    image: "jc21/nginx-proxy-manager:2.9.18"
     restart: unless-stopped
     container_name: nginx-proxy-manager
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - "80:80"
+      - "81:81"
+      - "443:443"
     environment:
       DB_MYSQL_HOST: "db"
       DB_MYSQL_PORT: 3306
@@ -131,14 +148,14 @@ services:
 
   db:
     profiles: ["proxy"]
-    image: 'jc21/mariadb-aria:10.4.15'
+    image: "jc21/mariadb-aria:10.4.15"
     restart: unless-stopped
     container_name: mariadb
     environment:
-      MYSQL_ROOT_PASSWORD: 'npm'
-      MYSQL_DATABASE: 'npm'
-      MYSQL_USER: 'npm'
-      MYSQL_PASSWORD: 'npm'
+      MYSQL_ROOT_PASSWORD: "npm"
+      MYSQL_DATABASE: "npm"
+      MYSQL_USER: "npm"
+      MYSQL_PASSWORD: "npm"
     networks:
       - cosmos-monitoring
     volumes:
@@ -149,25 +166,21 @@ services:
     image: portainer/portainer-ce
     container_name: portainer
     command: -H unix:///var/run/docker.sock
-    restart: always
+    restart: unless-stopped
     networks:
       - cosmos-monitoring
-    ports:
-      - 8000:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-  
+
   portainer-agent:
     profiles: ["monitor"]
     image: portainer/agent:latest
     container_name: portainer-agent
     command: -H unix:///var/run/docker.sock
-    restart: always
+    restart: unless-stopped
     networks:
       - cosmos-monitoring
-    ports:
-      - 9001:9001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/volumes:/var/lib/docker/volumes
