@@ -3,6 +3,7 @@ version: "3.5"
 volumes:
   prometheus_data: {}
   portainer_data: {}
+  grafana_data: {}
 
 networks:
   cosmos-monitoring:
